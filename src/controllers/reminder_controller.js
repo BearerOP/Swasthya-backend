@@ -3,7 +3,7 @@ const {
     delete_reminders,
     update_reminder,
     get_reminders,
-} = require("../services/reminder_services.js")
+} = require("../services/reminder_service.js")
 
 exports.create_reminder = async(req,res)=>
   {try {
