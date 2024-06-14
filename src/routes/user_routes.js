@@ -4,11 +4,11 @@ const router = express.Router();
 const user_auth = require("../../middleware/user_auth.js");
 
 const {
-  user_register,
   user_login,
+  user_register,
   user_logout,
-  user_profile,
-  sendOtp
+  sendOtp,
+  user_profile
 } = require("../controllers/user_controller.js");
 
 router.post("/login", user_login);

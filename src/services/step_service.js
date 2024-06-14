@@ -159,25 +159,25 @@ exports.view_step_weekly = async (req, res) => {
       const filteredRecords = stepData.record.filter(
         (record) => record.date >= oneWeekAgo && record.date <= currentDate
       );
-      return res.status(200).json({
+      return {
         success: true,
         message: "Weekly data fetched successfully",
         data: filteredRecords,
-      });
+      }
     } else {
-      return res.status(404).json({
+      return {
         success: false,
         message: "Weekly data not found",
         data: [],
-      });
+      }
     }
   } catch (error) {
     console.error("Error fetching weekly data:", error);
-    return res.status(500).json({
+    return {
       success: false,
       message: "Error fetching weekly data",
       error: error.message,
-    });
+    }
   }
 };
 
@@ -197,24 +197,24 @@ exports.view_step_monthly = async (req, res) => {
       const filteredRecords = stepData.record.filter(
         (record) => record.date >= oneMonthAgo && record.date <= currentDate
       );
-      return res.status(200).json({
+      return {
         success: true,
         message: "Monthly data fetched successfully",
         data: filteredRecords,
-      });
+      }
     } else {
-      return res.status(404).json({
+      return {
         success: false,
         message: "Monthly data not found",
         data: [],
-      });
+      }
     }
   } catch (error) {
     console.error("Error fetching monthly data:", error);
-    return res.status(500).json({
+    return {
       success: false,
       message: "Error fetching monthly data",
       error: error.message,
-    });
+    }
   }
 };
