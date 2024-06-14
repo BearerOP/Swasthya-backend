@@ -1,4 +1,18 @@
 {
+ 
+  "name": "heal-app",
+  "version": "1.0.0",
+  "description": "---",
+  "main": "index.js",
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start":"npx nodemon"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/BearerOP/heal-app.git"
+  },
   "dependencies": {
     "mongodb": "^6.7.0",
     "axios": "^1.7.2",
@@ -25,18 +39,6 @@
     "swagger-jsdoc": "^6.2.8",
     "swagger-ui-express": "^5.0.0",
     "telesignsdk": "^3.0.0"
-  },
-  "name": "heal-app",
-  "version": "1.0.0",
-  "description": "---",
-  "main": "index.js",
-  "devDependencies": {},
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/BearerOP/heal-app.git"
   },
   "author": "BearerOP",
   "license": "ISC",
