@@ -58,7 +58,7 @@ exports.user_login = async (req, res) => {
   }
 };
 
-xports.user_register = async (req, res) => {
+exports.user_register = async (req, res) => {
     const {
       username,
       mobile,

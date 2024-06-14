@@ -1,11 +1,7 @@
 const { user_login,user_register,user_logout, sendOtp, user_profile , user} = require("../services/user_validation_service.js")
 
 
-exports.user = async(req,res)=>{
-    console.log("hi");
-    res.send("hi")
 
-}
 
 // exports.user_login = async (req, res) => {
 //     try {
