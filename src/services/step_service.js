@@ -79,7 +79,6 @@ function calculateCaloriesBurned(
   gender,
   genderIdentity
 ) {
-  // Constants representing the energy expenditure per step for different genders (in calories per step)
   const energyExpenditurePerstep_modelMale = 0.05; // Adjust these values as needed
   const energyExpenditurePerstep_modelFemale = 0.04;
   const energyExpenditurePerstep_modelTransMale = 0.045;
@@ -95,16 +94,12 @@ function calculateCaloriesBurned(
   } else if (genderIdentity === "nonBinary") {
     energyExpenditurePerstep_model = energyExpenditurePerstep_modelNonBinary;
   } else {
-    // For cisgender individuals
     energyExpenditurePerstep_model =
       gender === "male"
         ? energyExpenditurePerstep_modelMale
         : energyExpenditurePerstep_modelFemale;
   }
 
-  // Calculate calories burned based on steps taken, weight, height, and gender
-  // Here you would use a more sophisticated equation like Harris-Benedict or Mifflin-St Jeor
-  // For demonstration purposes, I'm using a simplified formula
   const caloriesBurnedPerstep_model =
     (energyExpenditurePerstep_model * weight * height) / 100 / 100; // Convert height from cm to m
   return steps * caloriesBurnedPerstep_model;
