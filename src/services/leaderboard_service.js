@@ -1,7 +1,7 @@
 const user_model = require("../models/user_model");
 const step_model = require("../models/step_model");
 
-exports.overall = async (req) => {
+exports.overall = async (req,res) => {
   try {
     const user = req.user;
     if (!user) {
@@ -12,6 +12,7 @@ exports.overall = async (req) => {
     }
 
     const dateString = req.body.date;
+    
     const date = new Date(dateString);
     date.setHours(0, 0, 0, 0);
 
