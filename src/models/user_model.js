@@ -41,6 +41,19 @@ const userSchema = new mongoose.Schema({
     type: String,
     default: null,
   },
+  relatives: [mongoose.Schema.Types.ObjectId],
+  requests: [
+    {
+      sender_id: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "User",
+      },
+      status: {
+        type: Boolean,
+        default: false,
+      },
+    },
+  ],
   created_at: {
     type: Date,
     default: Date.now,

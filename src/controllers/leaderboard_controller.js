@@ -1,6 +1,6 @@
 const {
     overall,
-    friendsAndFamily
+    relatives
 } = require("../services/leaderboard_service.js")
 
 exports.overall = async (req, res) => {
@@ -27,9 +27,9 @@ exports.overall = async (req, res) => {
         })
     }
 }
-exports.friendsAndFamily = async (req, res) => {
+exports.relatives = async (req, res) => {
     try {
-        const data = await friendsAndFamily(req,res);
+        const data = await relatives(req,res);
         if(data.success){
             res.status(200).json( {
                 success: data.success,
@@ -45,10 +45,10 @@ exports.friendsAndFamily = async (req, res) => {
             })
         }
     } catch (error) {
-        console.error("Error fetching leaderboard:", error);
+        console.error("Error fetching relatives leaderboard:", error);
         res.status(500).json( {
             success: false,
-            message: "Error fetching leaderboard",
+            message: "Error fetching relatives leaderboard",
         })
     }
 }

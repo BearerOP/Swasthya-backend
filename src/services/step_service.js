@@ -79,6 +79,7 @@ function calculateCaloriesBurned(
   gender,
   genderIdentity
 ) {
+  // Constants representing the energy expenditure per step for different genders (in calories per step)
   const energyExpenditurePerstep_modelMale = 0.05; // Adjust these values as needed
   const energyExpenditurePerstep_modelFemale = 0.04;
   const energyExpenditurePerstep_modelTransMale = 0.045;
@@ -94,12 +95,16 @@ function calculateCaloriesBurned(
   } else if (genderIdentity === "nonBinary") {
     energyExpenditurePerstep_model = energyExpenditurePerstep_modelNonBinary;
   } else {
+    // For cisgender individuals
     energyExpenditurePerstep_model =
       gender === "male"
         ? energyExpenditurePerstep_modelMale
         : energyExpenditurePerstep_modelFemale;
   }
 
+  // Calculate calories burned based on steps taken, weight, height, and gender
+  // Here you would use a more sophisticated equation like Harris-Benedict or Mifflin-St Jeor
+  // For demonstration purposes, I'm using a simplified formula
   const caloriesBurnedPerstep_model =
     (energyExpenditurePerstep_model * weight * height) / 100 / 100; // Convert height from cm to m
   return steps * caloriesBurnedPerstep_model;
@@ -154,25 +159,25 @@ exports.view_step_weekly = async (req, res) => {
       const filteredRecords = stepData.record.filter(
         (record) => record.date >= oneWeekAgo && record.date <= currentDate
       );
-      return {
+      return res.status(200).json({
         success: true,
         message: "Weekly data fetched successfully",
         data: filteredRecords,
-      }
+      });
     } else {
-      return {
+      return res.status(404).json({
         success: false,
         message: "Weekly data not found",
         data: [],
-      }
+      });
     }
   } catch (error) {
     console.error("Error fetching weekly data:", error);
-    return {
+    return res.status(500).json({
       success: false,
       message: "Error fetching weekly data",
       error: error.message,
-    }
+    });
   }
 };
 
@@ -192,24 +197,24 @@ exports.view_step_monthly = async (req, res) => {
       const filteredRecords = stepData.record.filter(
         (record) => record.date >= oneMonthAgo && record.date <= currentDate
       );
-      return {
+      return res.status(200).json({
         success: true,
         message: "Monthly data fetched successfully",
         data: filteredRecords,
-      }
+      });
     } else {
-      return {
+      return res.status(404).json({
         success: false,
         message: "Monthly data not found",
         data: [],
-      }
+      });
     }
   } catch (error) {
     console.error("Error fetching monthly data:", error);
-    return {
+    return res.status(500).json({
       success: false,
       message: "Error fetching monthly data",
       error: error.message,
-    }
+    });
   }
 };

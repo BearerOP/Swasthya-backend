@@ -39,28 +39,31 @@ app.use(express.static(path.join(__dirname, "/public")));
 app.use("/", require("./src/routes/user_routes.js"));
 
 // // Workout Routes
-// app.use("/", require("./src/routes/workout_planner_routes.js"));
+app.use("/", require("./src/routes/workout_planner_routes.js"));
 
 // // Goal Setting Routes
-// app.use("/", require("./src/routes/goal_setting_routes.js"));
+app.use("/", require("./src/routes/goal_setting_routes.js"));
 
 // // Step Routes
 app.use("/", require("./src/routes/step_routes.js"));
 
 // // Reminder Routes
-// app.use("/", require("./src/routes/reminder_routes.js"));
+app.use("/", require("./src/routes/reminder_routes.js"));
 
 // // Sleep Patterns
 app.use("/", require("./src/routes/sleep_patterns_routes.js"));
 
 // // Meal Plan Routes
-// app.use("/", require("./src/routes/generate_meal_plan_routes.js"));
+app.use("/", require("./src/routes/generate_meal_plan_routes.js"));
 
 // // Medication Routes
-// app.use("/", require("./src/routes/medication_routes.js"));
+app.use("/", require("./src/routes/medication_routes.js"));
 
 // LeaderBoard Routes
 app.use("/", require("./src/routes/leaderboard_routes.js"));
+
+// Parental Wellbeing
+app.use("/", require("./src/routes/relatives_routes.js"));
 
 app.use("/public", express.static("public"));
 
