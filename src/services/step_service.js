@@ -4,8 +4,9 @@ const step_model = require("../models/step_model.js");
 
 exports.add_step = async (req, res) => {
   const user = req.user;
-  const { date, stepsIncrement } = req.body;
+  const { date, stepsIncrement } = req.body; // Using updatedSteps from frontend
   const formattedDate = new Date(`${date}T00:00:00.000Z`);
+  const updatedSteps = stepsIncrement;
 
   try {
     let stepData = await step_model.findOne({
@@ -26,11 +27,11 @@ exports.add_step = async (req, res) => {
     );
 
     if (existingRecordIndex !== -1) {
-      // Update existing record if found
-      stepData.record[existingRecordIndex].steps += stepsIncrement;
+      // Update existing record with new steps value
+      stepData.record[existingRecordIndex].steps = updatedSteps; // Update steps directly
       stepData.record[existingRecordIndex].caloriesBurned =
         calculateCaloriesBurned(
-          stepData.record[existingRecordIndex].steps,
+          updatedSteps,
           user.weight,
           user.height,
           user.gender,
@@ -40,9 +41,9 @@ exports.add_step = async (req, res) => {
       // Push a new item into the array if no record with the same date is found
       stepData.record.push({
         date: formattedDate,
-        steps: stepsIncrement,
+        steps: updatedSteps, // Assign new steps value
         caloriesBurned: calculateCaloriesBurned(
-          stepsIncrement,
+          updatedSteps,
           user.weight,
           user.height,
           user.gender,
@@ -109,6 +110,7 @@ function calculateCaloriesBurned(
     (energyExpenditurePerstep_model * weight * height) / 100 / 100; // Convert height from cm to m
   return steps * caloriesBurnedPerstep_model;
 }
+
 
 exports.view_step_daily = async (req, res) => {
   const user = req.user;
