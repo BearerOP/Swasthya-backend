@@ -70,12 +70,11 @@ exports.user_register = async (req, res) => {
   } = req.body;
   try {
     const existingUser = await user_model.findOne({ mobile });
-
     if (existingUser) {
-      return res.json({
+      return {
         message: "User already exists",
         success: false,
-      });
+      };
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
