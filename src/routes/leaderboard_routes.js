@@ -8,8 +8,8 @@ const {
   relatives,
 } = require("../controllers/leaderboard_controller.js");
 
-router.get("/leaderboard/overall", user_auth, overall);
+router.post("/leaderboard/overall", user_auth, overall);
 
-router.get("/leaderboard/relatives", user_auth, relatives);
+router.post("/leaderboard/relatives", user_auth, relatives);
 
 module.exports = router;
