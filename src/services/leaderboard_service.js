@@ -1,7 +1,7 @@
 const user_model = require("../models/user_model");
 const step_model = require("../models/step_model");
 
-exports.overall = async (req,res) => {
+exports.overall = async (req, res) => {
   try {
     const user = req.user;
     if (!user) {
@@ -12,7 +12,7 @@ exports.overall = async (req,res) => {
     }
 
     const dateString = req.body.date;
-    
+
     const date = new Date(dateString);
     date.setHours(0, 0, 0, 0);
 
@@ -74,14 +74,14 @@ exports.overall = async (req,res) => {
 
 exports.relatives = async (req, res) => {
   try {
-    const user = req.user;  // Assuming req.user is properly populated by middleware
+    const user = req.user; // Assuming req.user is properly populated by middleware
     if (!user) {
       return res.status(404).json({
         success: false,
         message: "User not found!",
       });
     }
-    
+
     const dateString = req.body.date;
     const date = new Date(dateString);
     date.setHours(0, 0, 0, 0);
@@ -123,15 +123,37 @@ exports.relatives = async (req, res) => {
         caloriesBurned: totalCalories,
       });
     }
+    let userStepData = await step_model.findOne({
+      user_id: user._id,
+      "record.date": {
+        $gte: date,
+        $lt: new Date(date.getTime() + 24 * 60 * 60 * 1000),
+      },
+    });
+    if (userStepData) {
+      leaderboard.push({
+        _id: user._id,
+        username: user.username,
+        steps: userStepData.record[0].steps,
+        caloriesBurned: userStepData.record[0].caloriesBurned,
+      });
+    } else {
+      leaderboard.push({
+        _id: user._id,
+        username: user.username,
+        steps: 0,
+        caloriesBurned: 0,
+      });
+    }
 
     // Sort the leaderboard by steps in descending order
     leaderboard.sort((a, b) => b.steps - a.steps);
 
-    return{
+    return {
       success: true,
       data: leaderboard,
       message: "Relatives leaderboard fetched successfully!",
-    }
+    };
   } catch (error) {
     console.error("Error fetching relatives leaderboard:", error);
     return {
