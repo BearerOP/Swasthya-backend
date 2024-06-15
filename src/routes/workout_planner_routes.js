@@ -17,7 +17,7 @@ const {
   workout_plans_muscles,
 } = require("../controllers/workout_planner_controller.js");
 
-router.get("/exercises/all", user_auth, exercises_all);
+router.get("/exercises", user_auth, exercises_all);
 
 router.get("/exercises/bodyPart", user_auth, exercises_bodyPart);
 

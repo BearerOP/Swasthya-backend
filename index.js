@@ -62,6 +62,7 @@ app.use("/", require("./src/routes/medication_routes.js"));
 // LeaderBoard Routes
 app.use("/", require("./src/routes/leaderboard_routes.js"));
 
+// Requests routes
 app.use("/", require('./src/routes/request_routes.js'))
 
 app.use("/public", express.static("public"));

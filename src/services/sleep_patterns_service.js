@@ -75,6 +75,7 @@ exports.sleep_duration_end = async (req, res) => {
     let { sleepQuality, sleep_id } = req.body;
     const sleepObjectId = new mongoose.Types.ObjectId(sleep_id);
     const wakeTime = Date.now();
+
     // Check if req.user exists and has _id property
     if (!req.user || !req.user._id) {
       return res.status(400).json({
@@ -83,55 +84,68 @@ exports.sleep_duration_end = async (req, res) => {
       });
     }
 
-    // Find the user
+    // Find the user and their sleep data
     const user = req.user;
-    if (!user) {
+    const sleepData = await sleep_model.findOne({ user_id: user._id });
+
+    if (!sleepData) {
       return res.status(404).json({
         success: false,
-        message: "User not found",
+        message: "Sleep data not found",
       });
     }
-    // Check if sleep data already exists
-    const sleepData = await sleep_model.findOne({ user_id: user._id });
-    let entryFound = false;
 
+    let entryFound = false;
     sleepData.record.forEach((entry) => {
       if (entry._id.equals(sleepObjectId)) {
+        // Check if wakeTime is already set
+        if (entry.wakeTime) {
+          return res.status(400).json({
+            success: false,
+            message: "Wake time is already set, duration cannot be updated",
+          });
+        }
+        
+        // Update wakeTime and sleepQuality
         entry.wakeTime = wakeTime;
         entry.sleepQuality = sleepQuality;
-        const duration = calculateDuration(entry.sleepTime, wakeTime);
-        entry.duration.hour = duration.hours;
-        entry.duration.minute = duration.minutes;
 
+        // Calculate duration only if it's not already set
+        if (entry.duration.hour === 0 && entry.duration.minute === 0) {
+          const duration = calculateDuration(entry.sleepTime.getTime(), wakeTime);
+          entry.duration.hour = duration.hours;
+          entry.duration.minute = duration.minutes;
+        }
         entryFound = true;
       }
     });
 
     if (!entryFound) {
-      return {
+      return res.status(404).json({
         success: false,
         message: "Sleep entry not found",
-      };
+      });
     }
 
     const updatedSleepData = await sleepData.save();
+
     if (updatedSleepData) {
       return {
         success: true,
         message: "Sleep ending entry added successfully",
-      };
+      }
     } else {
       return {
         success: false,
         message: "Sleep ending entry not added",
-      };
+      }
     }
   } catch (error) {
     return {
       success: false,
       message: "Internal server error",
-      error,
-    };
+      error: error.message,
+    }
   }
 };
 
@@ -184,6 +198,7 @@ exports.sleep_view = async (req, res) => {
       });
     }
     const user = req.user;
+    console.log(user);
     if (!user) {
       return res.status(404).json({
         success: false,
@@ -230,7 +245,6 @@ exports.sleep_weekly_avg = async (req, res) => {
       weekDate = new Date(weekDate);
     }
 
-
     weekDate.setHours(0, 0, 0, 0);
     // Check if req.user exists and has _id property
     if (!req.user || !req.user._id) {
@@ -246,7 +260,8 @@ exports.sleep_weekly_avg = async (req, res) => {
       return {
         success: false,
         message: "No sleep data found",
-      };51
+      };
+      51;
     }
     const lastWeekRecords = sleepData.record.filter((entry) => {
       const entryDate = new Date(entry.sleepTime);

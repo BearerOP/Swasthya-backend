@@ -18,3 +18,16 @@ exports.create_medication = async (req, res) => {
     res.status(500).json(error);
   }
 };
+exports.view_medication = async (req, res) => {
+  try {
+    const data = await view_medication(req, res);
+    if (data.success) {
+      res.status(200).json(data);
+    } else {
+      res.status(500).json(data);
+    }
+  } catch (error) {
+    console.log(error)
+    res.status(500).json(error);
+  }
+};
