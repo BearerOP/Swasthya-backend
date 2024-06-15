@@ -6,6 +6,10 @@ exports.exercises_all = async (req, res) => {
   const options = {
     method: "GET",
     url: `${host}/exercises`,
+    params: {
+      limit: "10",
+      offset: "0",
+    },
     headers: {
       "x-rapidapi-key": process.env.x_rapidapi_key,
       "x-rapidapi-host": "exercisedb.p.rapidapi.com",
