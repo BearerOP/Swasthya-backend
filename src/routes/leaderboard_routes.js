@@ -5,11 +5,11 @@ const user_auth = require("../../middleware/user_auth.js");
 
 const {
   overall,
-  friendsAndFamily,
+  relatives,
 } = require("../controllers/leaderboard_controller.js");
 
 router.get("/leaderboard/overall", user_auth, overall);
 
-router.get("/leaderboard/friendsAndFamily", user_auth, friendsAndFamily);
+router.get("/leaderboard/relatives", user_auth, relatives);
 
 module.exports = router;

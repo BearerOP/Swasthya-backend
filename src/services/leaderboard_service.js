@@ -40,7 +40,7 @@ exports.overall = async (req) => {
           const recordDate = new Date(record.date);
           if (recordDate.toDateString() === date.toDateString()) {
             totalSteps += record.steps;
-            totalCalories += record.calories;
+            totalCalories += record.caloriesBurned;
           }
         }
       }
@@ -59,13 +59,83 @@ exports.overall = async (req) => {
     return {
       success: true,
       message: "Overall leaderboard fetched successfully!",
-      data:leaderboard,
+      data: leaderboard,
     };
   } catch (error) {
     console.error("Error fetching overall leaderboard:", error);
     return {
       success: false,
       message: "Error fetching overall leaderboard",
+      error: error.message,
+    };
+  }
+};
+
+exports.relatives = async (req, res) => {
+  try {
+    const user = req.user;  // Assuming req.user is properly populated by middleware
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found!",
+      });
+    }
+    
+    const dateString = req.body.date;
+    const date = new Date(dateString);
+    date.setHours(0, 0, 0, 0);
+
+    // Fetch relatives of the current user
+    const relatives = await user_model.find({
+      relatives: user._id,
+    });
+
+    const leaderboard = [];
+
+    for (const relative of relatives) {
+      // Query steps records for each relative for the specified date
+      const steps = await step_model.find({
+        user_id: relative._id,
+        "record.date": {
+          $gte: date,
+          $lt: new Date(date.getTime() + 24 * 60 * 60 * 1000),
+        },
+      });
+
+      let totalSteps = 0;
+      let totalCalories = 0;
+
+      for (const stepRecord of steps) {
+        for (const record of stepRecord.record) {
+          const recordDate = new Date(record.date);
+          if (recordDate.toDateString() === date.toDateString()) {
+            totalSteps += record.steps;
+            totalCalories += record.caloriesBurned;
+          }
+        }
+      }
+
+      leaderboard.push({
+        _id: relative._id,
+        username: relative.username,
+        steps: totalSteps,
+        caloriesBurned: totalCalories,
+      });
+    }
+
+    // Sort the leaderboard by steps in descending order
+    leaderboard.sort((a, b) => b.steps - a.steps);
+
+    return{
+      success: true,
+      data: leaderboard,
+      message: "Relatives leaderboard fetched successfully!",
+    }
+  } catch (error) {
+    console.error("Error fetching relatives leaderboard:", error);
+    return {
+      success: false,
+      message: "Error fetching relatives leaderboard",
       error: error.message,
     };
   }

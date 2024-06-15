@@ -4,7 +4,7 @@ const {
   sleep_view,
   sleep_view_all,
   sleep_weekly_avg
-} = require("../services/sleep_patterns_service.js");
+} = require("../services/sleep_patterns_service");
 
 exports.sleep_duration_add = async (req, res) => {
   try {
