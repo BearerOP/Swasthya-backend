@@ -232,3 +232,38 @@ exports.user_profile = async (req, res) => {
     };
   }
 };
+
+exports.allUsers = async(req,res)=>{
+  const user = req.user;
+  try {
+    if (!user) {
+      return {
+        success: false,
+        message: "User not found",
+      };
+    }
+    const users = await user_model.find({}).select("-password -auth_key")
+    .exec(); ;
+
+    if(!users){
+      return {
+        success: false,
+        message: "Users not fetched",
+      };
+    }
+    return {
+      success: false,
+      message: "Users data fetched",
+      data:users
+    };
+    
+  } catch (error) {
+    console.error("Error: ", error);
+    return {
+      success: false,
+      message: "An unexpected error occurred",
+      error: error,
+    };
+    
+  }
+}

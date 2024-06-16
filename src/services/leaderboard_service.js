@@ -163,3 +163,86 @@ exports.relatives = async (req, res) => {
     };
   }
 };
+
+exports.overall_ranking = async (req, res) => {
+  const user = req.user;
+  try {
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found!",
+      });
+    }
+
+    const dateString = req.body.date;
+    const date = new Date(dateString);
+    date.setHours(0, 0, 0, 0);
+
+    const allUsers = await user_model.find({});
+    if (!allUsers || allUsers.length === 0) {
+      return res.status(404).json({
+        success: false,
+        message: "Users not found!",
+      });
+    }
+
+    const leaderboard = [];
+
+    for (const user of allUsers) {
+      const { _id, username } = user;
+
+      const steps = await step_model.find({
+        user_id: _id,
+        "record.date": { $lte: date },
+      });
+
+      let totalSteps = 0;
+      for (const stepRecord of steps) {
+        for (const record of stepRecord.record) {
+          const recordDate = new Date(record.date);
+          if (recordDate.toDateString() === date.toDateString()) {
+            totalSteps += record.steps;
+          }
+        }
+      }
+
+      leaderboard.push({
+        user_id: _id,
+        username,
+        totalSteps,
+      });
+    }
+
+    // Sort the leaderboard by totalSteps in descending order
+    leaderboard.sort((a, b) => b.totalSteps - a.totalSteps);
+
+    // Find user's ranking
+    let userRanking = -1;
+    leaderboard.forEach((entry, index) => {
+      if (entry.user_id.toString() === user._id.toString()) {
+        userRanking = index + 1; // Rankings are 1-based
+      }
+    });
+
+    // If user not found in leaderboard, handle accordingly
+    if (userRanking === -1) {
+      return{
+        success: false,
+        message: "User not found in leaderboard",
+      }
+    }
+
+    return {
+      success: true,
+      message: "Overall ranking fetched successfully!",
+      ranking:userRanking
+    }
+  } catch (error) {
+    console.error("Error fetching overall ranking:", error);
+    return {
+    success: false,
+    message: "Error fetching overall ranking",
+    error: error.message,
+    }
+  }
+};
