@@ -65,6 +65,9 @@ app.use("/", require("./src/routes/leaderboard_routes.js"));
 // Requests routes
 app.use("/", require('./src/routes/request_routes.js'))
 
+// Relatives Routes
+app.use("/", require('./src/routes/relatives_routes.js'))
+
 app.use("/public", express.static("public"));
 
 app.use(express.json());
