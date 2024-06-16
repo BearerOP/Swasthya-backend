@@ -13,6 +13,6 @@ router.post("/leaderboard/overall", user_auth, overall);
 
 router.post("/leaderboard/relatives", user_auth, relatives);
 
-router.get('/leaderboard/overall/ranking',user_auth,overall_ranking)
+router.post('/leaderboard/overall/ranking',user_auth,overall_ranking)
 
 module.exports = router;
