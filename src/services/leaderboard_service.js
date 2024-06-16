@@ -220,7 +220,7 @@ exports.overall_ranking = async (req, res) => {
     let userRanking = -1;
     leaderboard.forEach((entry, index) => {
       if (entry.user_id.toString() === user._id.toString()) {
-        userRanking = index + 1; // Rankings are 1-based
+        userRanking = index + 1;
       }
     });
 
