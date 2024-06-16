@@ -8,7 +8,7 @@ exports.send_request = async (req, res) => {
 
     let receiverData = await user_model.findById({ _id: receiverId });
 
-    console.log(receiverData);
+    // console.log(receiverData);
     if (!receiverData) {
       return {
         message: "Receiver not found",
@@ -47,7 +47,7 @@ exports.send_request = async (req, res) => {
       };
     }
   } catch (error) {
-    console.error(error);
+    // console.error(error);
     return {
       success: false,
       message: error.message,
@@ -73,20 +73,29 @@ exports.alluser = async (req, res) => {
 exports.allRequest = async (req, res) => {
   try {
     const user_id = req.user._id;
-    console.log(user_id);
     if (user_id) {
       const user_data = await user_model.findOne({ _id: user_id });
 
-      console.log(user_data);
+      // Populate sender's name for each request
+      let allSenderData = [];
+      for (const sender of user_data.requests) {
+        let senderData = await user_model
+          .findOne({ _id: sender.sender_id })
+          .select("-password -auth_key -notificationToken")
+          .exec();
+        allSenderData.push(senderData);
+
+      }
       return {
         success: true,
-        data: user_data.requests,
+        message:"All Relatives' Requests fetched",
+        data: allSenderData,
       };
     }
   } catch (error) {
     return {
       success: false,
-      massege: error.massege,
+      message: error.message,
     };
   }
 };
@@ -97,9 +106,9 @@ exports.acceptRequest = async (req, res) => {
     let Arr = [];
 
     let sender_id = req.body.senderId;
-    let _id = req.body._id;
-    let __id = new mongoose.Types.ObjectId(_id);
-    console.log(__id);
+    // let _id = req.body._id;
+    // let __id = new mongoose.Types.ObjectId(_id);
+    // console.log(__id);
     // const user_data = await user_model.findOne({_id:user_id})
     // let senderID = new mongoose.Types.ObjectId(sender_id)
     // // let id = new mongoose.Types.ObjectId(_id)
@@ -136,8 +145,8 @@ exports.acceptRequest = async (req, res) => {
     const existingresiver = sender_data.relatives.find((request) =>
       request.equals(user._id)
     );
-    console.log(existingsender);
-    if (!existingsender&&!existingresiver) {
+    // console.log(existingsender);
+    if (!existingsender && !existingresiver) {
       user.relatives.push(sender_id);
       const userDatasave = user.save();
       sender_data.relatives.push(user._id);
@@ -146,28 +155,28 @@ exports.acceptRequest = async (req, res) => {
       const existingresiver = user.requests.findIndex((request) =>
         request.sender_id.equals(sender_id)
       );
-      if(existingresiver !=-1){
-        for(i=0;i<user.requests.length;i++){
-            if(user.requests[i]!==user.requests[existingresiver]){
-                Arr.push(user.requests[i])
-                await user_data.save()
-            }
+      if (existingresiver != -1) {
+        for (i = 0; i < user.requests.length; i++) {
+          if (user.requests[i] !== user.requests[existingresiver]) {
+            Arr.push(user.requests[i]);
+            await user_data.save();
+          }
         }
-        await user_model.findOneAndUpdate({_id:user._id},
-            {$set:{requests:Arr}}
-        )
+        await user_model.findOneAndUpdate(
+          { _id: user._id },
+          { $set: { requests: Arr } }
+        );
       }
-      console.log(existingresiver);
-      return{
-        success:true,
-        data:"request accepted",
-    }
-
-    } else{
-        return{
-            success:false,
-            data:"alrady existe",
-        }
+      // console.log(existingresiver);
+      return {
+        success: true,
+        data: "request accepted",
+      };
+    } else {
+      return {
+        success: false,
+        data: "alrady existe",
+      };
     }
     // console.log(userDatasave);
     // if (!existingresiver) {
@@ -178,7 +187,6 @@ exports.acceptRequest = async (req, res) => {
     //     data:savedata
     //   }
     // }
-
   } catch (error) {
     console.log(error);
     return {
