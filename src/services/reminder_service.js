@@ -1,39 +1,38 @@
 const mongoose = require("mongoose");
 const reminderModel = require("../models/reminder_model");
-const {
-  sendNotification,
-  getUserToken,
-} = require("../../public/utils/notification.js");
 const schedule = require("node-schedule");
 
-const scheduleReminder = (reminderId, info) => {
-  const { message, time, repeat } = info;
-  const date = new Date(time);
+const { scheduleReminder } = require("../../public/utils/scheduler.js")
 
-  if (date > new Date()) {
-    const job = schedule.scheduleJob(date, async () => {
-      try {
-        const reminder = await reminderModel
-          .findById(reminderId)
-          .populate("user_id");
-        if (reminder) {
-          const token = await getUserToken(reminder.user_id._id);
-          sendNotification(token, message);
-        }
 
-        if (repeat === "daily") {
-          const nextDay = new Date(date);
-          nextDay.setDate(nextDay.getDate() + 1);
-          scheduleReminder(reminderId, { ...info, time: nextDay });
-        }
-      } catch (error) {
-        console.error("Error sending notification:", error.message);
-      }
-    });
+// const scheduleReminder = (reminderId, info) => {
+//   const { message, time, repeat } = info;
+//   const date = new Date(time);
 
-    console.log(`Scheduled reminder ${reminderId} for ${date}`);
-  }
-};
+//   if (date > new Date()) {
+//     const job = schedule.scheduleJob(date, async () => {
+//       try {
+//         const reminder = await reminderModel
+//           .findById(reminderId)
+//           .populate("user_id");
+//         if (reminder) {
+//           const token = await getUserToken(reminder.user_id._id);
+//           sendNotification(token, message);
+//         }
+
+//         if (repeat === "daily") {
+//           const nextDay = new Date(date);
+//           nextDay.setDate(nextDay.getDate() + 1);
+//           scheduleReminder(reminderId, { ...info, time: nextDay });
+//         }
+//       } catch (error) {
+//         console.error("Error sending notification:", error.message);
+//       }
+//     });
+
+//     console.log(`Scheduled reminder ${reminderId} for ${date}`);
+//   }
+// };
 
 const createOrUpdateReminder = async (user_id, reminderInfo) => {
   try {
@@ -109,20 +108,6 @@ function convertISTtoGMT(istTimestamp) {
   return `${year}-${month}-${day}T${hours}:${minutes}:${seconds}Z`;
 }
 
-function addHoursToTimestamp(timestampStr, hours, minutes) {
-  // Convert timestamp string to Date object
-  let originalDate = new Date(timestampStr);
-
-  // Add hours and minutes
-  originalDate.setHours(originalDate.getHours() + hours);
-  originalDate.setMinutes(originalDate.getMinutes() + minutes);
-
-  // Format the updated date to ISO 8601 format
-  let updatedTimestamp = originalDate.toISOString();
-
-  return updatedTimestamp;
-}
-
 exports.create_reminder = async (req, res) => {
   try {
     const user_id = req.user.id;
@@ -130,9 +115,6 @@ exports.create_reminder = async (req, res) => {
     if (user_id) {
       let { type, title, message, time, repeat } = req.body;
       time = convertISTtoGMT(time);
-      time = addHoursToTimestamp(time, 5, 30);
-
-      console.log(time);
       const reminderInfo = { type, message, time, repeat, title };
       const response = await createOrUpdateReminder(user_id, reminderInfo);
       if (response.success) {

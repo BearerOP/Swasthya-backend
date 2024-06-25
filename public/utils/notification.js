@@ -4,7 +4,7 @@ const userModel = require("../../src/models/user_model");
 // Initialize Firebase Admin SDK
 if (!admin.apps.length) {
   admin.initializeApp({
-    credential: admin.credential.cert({
+    credential: admin.credential.cert({ 
       type: process.env.GC_TYPE,
       project_id: process.env.GC_PROJECT_ID,
       private_key_id: process.env.GC_PRIVATE_KEY_ID,
@@ -41,6 +41,7 @@ const getUserToken = async (userId) => {
  * @param {String} message - The message to be sent
  */
 const sendNotification = async (token, message) => {
+  console.log("notification service reached");
   try {
     const response = await admin.messaging().send({
       token: token,
