@@ -20,6 +20,10 @@ const reminderSchema = new mongoose.Schema({
       message: {
         type: String,
       },
+      format:{
+        type: String,
+        default:"short"
+      },
       time: { 
         type: Date, 
         required: true 

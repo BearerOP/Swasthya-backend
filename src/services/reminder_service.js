@@ -1,38 +1,6 @@
-const mongoose = require("mongoose");
 const reminderModel = require("../models/reminder_model");
-const schedule = require("node-schedule");
 
 const { scheduleReminder } = require("../../public/utils/scheduler.js")
-
-
-// const scheduleReminder = (reminderId, info) => {
-//   const { message, time, repeat } = info;
-//   const date = new Date(time);
-
-//   if (date > new Date()) {
-//     const job = schedule.scheduleJob(date, async () => {
-//       try {
-//         const reminder = await reminderModel
-//           .findById(reminderId)
-//           .populate("user_id");
-//         if (reminder) {
-//           const token = await getUserToken(reminder.user_id._id);
-//           sendNotification(token, message);
-//         }
-
-//         if (repeat === "daily") {
-//           const nextDay = new Date(date);
-//           nextDay.setDate(nextDay.getDate() + 1);
-//           scheduleReminder(reminderId, { ...info, time: nextDay });
-//         }
-//       } catch (error) {
-//         console.error("Error sending notification:", error.message);
-//       }
-//     });
-
-//     console.log(`Scheduled reminder ${reminderId} for ${date}`);
-//   }
-// };
 
 const createOrUpdateReminder = async (user_id, reminderInfo) => {
   try {
@@ -114,8 +82,14 @@ exports.create_reminder = async (req, res) => {
     
     if (user_id) {
       let { type, title, message, time, repeat } = req.body;
+      let format="";
+      if (type == "sleep"|| type == "medication") {
+        format = "long";
+      }else{
+        format = "short";
+      }
       time = convertISTtoGMT(time);
-      const reminderInfo = { type, message, time, repeat, title };
+      const reminderInfo = { type, message,format, time, repeat, title };
       const response = await createOrUpdateReminder(user_id, reminderInfo);
       if (response.success) {
         return {
