@@ -200,11 +200,11 @@ const {
   HarmCategory,
   HarmBlockThreshold,
 } = require("@google/generative-ai");
-const { GoogleAIFileManager } = require("@google/generative-ai/files");
+// const { GoogleAIFileManager } = require("@google/generative-ai/files");
 
 const apiKey = "AIzaSyATqmJGmCwbmKS45z9_kpkHr3J9X7X6EAA";
 const genAI = new GoogleGenerativeAI(apiKey);
-const fileManager = new GoogleAIFileManager(apiKey);
+// const fileManager = new GoogleAIFileManager(apiKey);
 
 /**
  * Uploads the given file to Gemini.

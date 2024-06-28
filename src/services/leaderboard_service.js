@@ -11,10 +11,31 @@ exports.overall = async (req, res) => {
       };
     }
 
-    const dateString = req.body.date;
+    const { period } = req.body;
+    let dateFilter;
 
-    const date = new Date(dateString);
-    date.setHours(0, 0, 0, 0);
+    const now = new Date();
+    now.setHours(5, 30, 0, 0); // Adjust the time zone as needed
+
+    if (period === "today") {
+      const today = new Date(now);
+      today.setHours(0, 0, 0, 0);
+      dateFilter = { $gte: today, $lte: now };
+    } else if (period === "weekly") {
+      const startOfWeek = new Date(now);
+      startOfWeek.setDate(now.getDate() - now.getDay()); // Start of the current week
+      startOfWeek.setHours(0, 0, 0, 0);
+      dateFilter = { $gte: startOfWeek, $lte: now };
+    } else if (period === "monthly") {
+      const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1); // Start of the current month
+      startOfMonth.setHours(0, 0, 0, 0);
+      dateFilter = { $gte: startOfMonth, $lte: now };
+    } else {
+      return {
+        success: false,
+        message: "Invalid period specified!",
+      };
+    }
 
     const allUsers = await user_model.find({});
     if (!allUsers || allUsers.length === 0) {
@@ -31,7 +52,7 @@ exports.overall = async (req, res) => {
 
       const steps = await step_model.find({
         user_id: _id,
-        "record.date": { $lte: date }, // Change to less than or equal to date
+        "record.date": dateFilter,
       });
 
       let totalSteps = 0;
@@ -39,7 +60,7 @@ exports.overall = async (req, res) => {
       for (const stepRecord of steps) {
         for (const record of stepRecord.record) {
           const recordDate = new Date(record.date);
-          if (recordDate.toDateString() === date.toDateString()) {
+          if (recordDate >= dateFilter.$gte && recordDate <= dateFilter.$lte) {
             totalSteps += record.steps;
             totalCalories += record.caloriesBurned;
           }
@@ -76,15 +97,37 @@ exports.relatives = async (req, res) => {
   try {
     const user = req.user; // Assuming req.user is properly populated by middleware
     if (!user) {
-      return res.status(404).json({
+      return {
         success: false,
         message: "User not found!",
-      });
+      };
     }
 
-    const dateString = req.body.date;
-    const date = new Date(dateString);
-    date.setHours(0, 0, 0, 0);
+    const { period } = req.body;
+    let dateFilter;
+
+    const now = new Date();
+    now.setHours(5, 30, 0, 0); // Adjust the time zone as needed
+
+    if (period === "today") {
+      const today = new Date(now);
+      today.setHours(0, 0, 0, 0);
+      dateFilter = { $gte: today, $lte: now };
+    } else if (period === "weekly") {
+      const startOfWeek = new Date(now);
+      startOfWeek.setDate(now.getDate() - now.getDay()); // Start of the current week
+      startOfWeek.setHours(0, 0, 0, 0);
+      dateFilter = { $gte: startOfWeek, $lte: now };
+    } else if (period === "monthly") {
+      const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1); // Start of the current month
+      startOfMonth.setHours(0, 0, 0, 0);
+      dateFilter = { $gte: startOfMonth, $lte: now };
+    } else {
+      return {
+        success: false,
+        message: "Invalid period specified!",
+      };
+    }
 
     // Fetch relatives of the current user
     const relatives = await user_model.find({
@@ -94,13 +137,10 @@ exports.relatives = async (req, res) => {
     const leaderboard = [];
 
     for (const relative of relatives) {
-      // Query steps records for each relative for the specified date
+      // Query steps records for each relative for the specified date range
       const steps = await step_model.find({
         user_id: relative._id,
-        "record.date": {
-          $gte: date,
-          $lt: new Date(date.getTime() + 24 * 60 * 60 * 1000),
-        },
+        "record.date": dateFilter,
       });
 
       let totalSteps = 0;
@@ -109,7 +149,7 @@ exports.relatives = async (req, res) => {
       for (const stepRecord of steps) {
         for (const record of stepRecord.record) {
           const recordDate = new Date(record.date);
-          if (recordDate.toDateString() === date.toDateString()) {
+          if (recordDate >= dateFilter.$gte && recordDate <= dateFilter.$lte) {
             totalSteps += record.steps;
             totalCalories += record.caloriesBurned;
           }
@@ -123,28 +163,32 @@ exports.relatives = async (req, res) => {
         caloriesBurned: totalCalories,
       });
     }
-    let userStepData = await step_model.findOne({
+
+    // Fetch steps for the current user for the specified date range
+    const userSteps = await step_model.find({
       user_id: user._id,
-      "record.date": {
-        $gte: date,
-        $lt: new Date(date.getTime() + 24 * 60 * 60 * 1000),
-      },
+      "record.date": dateFilter,
     });
-    if (userStepData) {
-      leaderboard.push({
-        _id: user._id,
-        username: user.username,
-        steps: userStepData.record[0].steps,
-        caloriesBurned: userStepData.record[0].caloriesBurned,
-      });
-    } else {
-      leaderboard.push({
-        _id: user._id,
-        username: user.username,
-        steps: 0,
-        caloriesBurned: 0,
-      });
+
+    let userTotalSteps = 0;
+    let userTotalCalories = 0;
+
+    for (const stepRecord of userSteps) {
+      for (const record of stepRecord.record) {
+        const recordDate = new Date(record.date);
+        if (recordDate >= dateFilter.$gte && recordDate <= dateFilter.$lte) {
+          userTotalSteps += record.steps;
+          userTotalCalories += record.caloriesBurned;
+        }
+      }
     }
+
+    leaderboard.push({
+      _id: user._id,
+      username: user.username,
+      steps: userTotalSteps,
+      caloriesBurned: userTotalCalories,
+    });
 
     // Sort the leaderboard by steps in descending order
     leaderboard.sort((a, b) => b.steps - a.steps);
@@ -176,7 +220,7 @@ exports.overall_ranking = async (req, res) => {
 
     const dateString = req.body.date;
     const date = new Date(dateString);
-    date.setHours(0, 0, 0, 0);
+    date.setHours(5, 30, 0, 0);
 
     const allUsers = await user_model.find({});
     if (!allUsers || allUsers.length === 0) {
