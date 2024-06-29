@@ -1,5 +1,6 @@
 const medication_model = require("../models/medication_model");
-
+const reminderModel = require("../models/reminder_model");
+const { scheduleReminder } = require("../../public/utils/scheduler");
 exports.create_medication = async (req, res) => {
   const user_id = req.user._id;
   const {
@@ -21,9 +22,13 @@ exports.create_medication = async (req, res) => {
   }
 
   try {
+    let newUser;
+    let updatedUser;
+
     const existingUser = await medication_model.findOne({ user_id });
+
     if (!existingUser) {
-      const newUser = await medication_model.create({
+      newUser = await medication_model.create({
         user_id,
         record: [
           {
@@ -38,55 +43,107 @@ exports.create_medication = async (req, res) => {
           },
         ],
       });
+
       if (!newUser) {
         return {
           success: false,
           message: "Medication not added",
         };
       }
-      return {
-        success: true,
-        message: "Medication added successfully",
-        data: newUser,
-      };
-    }
-
-    const updatedUser = await medication_model.findOneAndUpdate(
-      { user_id },
-      {
-        $push: {
-          record: {
-            medicine_name,
-            forms,
-            strength,
-            unit,
-            frequency,
-            times,
-            start_date,
-            description,
+    } else {
+      updatedUser = await medication_model.findOneAndUpdate(
+        { user_id },
+        {
+          $push: {
+            record: {
+              medicine_name,
+              forms,
+              strength,
+              unit,
+              frequency,
+              times,
+              start_date,
+              description,
+            },
           },
         },
-      },
-      { new: true }
-    );
+        { new: true }
+      );
 
-    if (!updatedUser) {
-      return {
-        success: false,
-        message: "Medication not added",
-      };
+      if (!updatedUser) {
+        return {
+          success: false,
+          message: "Medication not added",
+        };
+      }
     }
-    
+
+    // Extract times from either newUser or updatedUser based on condition
+    const medicationRecords = newUser ? newUser.record : updatedUser.record;
+
+    // Schedule reminders for each time in times array
+    await scheduleMedicationReminders(medicationRecords, user_id);
+
     return {
       success: true,
       message: "Medication added successfully",
-      data: updatedUser,
+      data: newUser || updatedUser,
     };
   } catch (error) {
-    console.log(error);
+    console.error(error);
     return {
       success: false,
-      message: error,
+      message: "An error occurred while adding medication",
+      error: error.message,
     };
+  }
+};
+
+const scheduleMedicationReminders = async (medicationRecords, user_id) => {
+  try {
+    for (let medication of medicationRecords) {
+      for (let timeEntry of medication.times) {
+        //  let time =  convertUTCToIST(timeEntry.time);
+        let time = timeEntry.time;
+        let repeat = "none";
+        if (medication.frequency.type === "As Needed") {
+          repeat = "daily";
+        }
+
+        // Create or update reminder in the database
+        let reminderEntry = await reminderModel.updateOne(
+          { user_id: user_id },
+          {
+            $push: {
+              reminder_info: {
+                type: "medication",
+                title: medication.medicine_name,
+                message: `It's time to take your ${medication.medicine_name}`,
+                time: time,
+                repeat: repeat, // Adjust repeat logic based on your requirements
+              },
+            },
+          },
+          { upsert: true }
+        );
+
+        if (!reminderEntry) {
+          console.error(
+            `Failed to create/update reminder in the database for ${time}`
+          );
+          continue; // Skip to the next time entry if this fails
+        }
+
+        const reminder = await reminderModel.findOne({ user_id: user_id });
+
+        scheduleReminder(reminder._id, {
+          message: `It's time to take your ${medication.medicine_name}`,
+          time: time,
+          repeat: repeat, // Adjust repeat logic based on your requirements
+        });
+      }
+    }
+  } catch (error) {
+    console.log(error);
   }
 };
