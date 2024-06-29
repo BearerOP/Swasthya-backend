@@ -30,7 +30,7 @@ const reminderSchema = new mongoose.Schema({
       },
       repeat: { 
         type: String,
-        default:'none',
+        default:'daily',
       },
       created_at: {
         type: Date,
