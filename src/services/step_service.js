@@ -111,12 +111,10 @@ function calculateCaloriesBurned(
   return steps * caloriesBurnedPerstep_model;
 }
 
-
 exports.view_step_daily = async (req, res) => {
   const user = req.user;
-  const { date } = req.body;
-  const formattedDate = new Date(date); // Use the date directly without modifying the time component
-
+  let date = new Date();
+  date.setHours(5,30,0,0)
   try {
     let stepData = await step_model.findOne({
       user_id: user._id,
@@ -124,7 +122,7 @@ exports.view_step_daily = async (req, res) => {
 
     if (stepData) {
       stepData.record = stepData.record.filter(
-        (record) => record.date.getTime() === formattedDate.getTime()
+        (record) => record.date.getTime() === date.getTime()
       );
       return {
         success: true,
