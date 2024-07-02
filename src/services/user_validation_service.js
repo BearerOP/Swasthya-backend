@@ -232,7 +232,7 @@ exports.user_profile = async (req, res) => {
   }
 };
 
-exports.allUsers = async(req,res)=>{
+exports.allUsers = async (req, res) => {
   const user = req.user;
   try {
     if (!user) {
@@ -241,10 +241,12 @@ exports.allUsers = async(req,res)=>{
         message: "User not found",
       };
     }
-    const users = await user_model.find({}).select("-password -auth_key")
-    .exec(); ;
+    const users = await user_model
+      .find({})
+      .select("-password -auth_key")
+      .exec();
 
-    if(!users){
+    if (!users) {
       return {
         success: false,
         message: "Users not fetched",
@@ -253,9 +255,8 @@ exports.allUsers = async(req,res)=>{
     return {
       success: false,
       message: "Users data fetched",
-      data:users
+      data: users,
     };
-    
   } catch (error) {
     console.error("Error: ", error);
     return {
@@ -263,17 +264,63 @@ exports.allUsers = async(req,res)=>{
       message: "An unexpected error occurred",
       error: error,
     };
-    
   }
-}
+};
 
-exports.profile_update = async (req,res)=>{
+exports.profile_update = async (req, res) => {
   const user = req.user;
   if (!user) {
     return {
       success: false,
       message: "User not found",
     };
-    }
+  }
+  const { username, height, weight, dob, food_preference } = req.body;
 
+  try {
+    if (username) {
+      const existingUser = await user_model.findOne({ username: username });
+      if (existingUser) {
+        return {
+          success: false,
+          message: "Username already exists, try something else",
+        };
+      }
+    }
+    const updatedFields = {};
+    if (username) updatedFields.username = username;
+    if (height) updatedFields.height = height;
+    if (weight) updatedFields.weight = weight;
+    if (food_preference) updatedFields.food_preference = food_preference;
+    if (dob) updatedFields.dob = new Date(dob);
+
+    updatedFields.updated_at = new Date();
+
+    let updatedData = await user_model.findByIdAndUpdate(
+      user._id,
+      updatedFields,
+      { new: true }
+    );
+    if (!updatedData) {
+      return {
+        success: false,
+        message: "User not found",
+      };
+    }
+    return {
+      success: true,
+      message: "Profile updated successfully",
+      data: updatedData,
+    };
+  } catch (err) {
+    return {
+      success: false,
+      message: "An error occurred while updating the profile",
+      error: err.message,
+    };
+  }
+};
+
+exports.profile_picture = async (req, res) => {
+  
 }
