@@ -13,6 +13,10 @@ const userSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
+  picture: {
+    type: String,
+    default: "",
+  },
   weight: {
     type: Number, // User's weight in kilograms
     required: true,

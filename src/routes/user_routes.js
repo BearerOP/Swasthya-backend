@@ -1,7 +1,11 @@
 const express = require("express");
 const router = express.Router();
+const multer = require("multer");
 
 const user_auth = require("../../middleware/user_auth.js");
+
+const storageMulter = multer.memoryStorage();
+const upload = multer({ storage: storageMulter });
 
 const {
   user_login,
@@ -11,6 +15,7 @@ const {
   user_profile,
   allUsers,
   profile_update,
+  profile_picture
 } = require("../controllers/user_controller.js");
 
 router.post("/login", user_login);
@@ -25,6 +30,8 @@ router.get("/profile", user_auth, user_profile);
 
 router.get("/allUsers", user_auth, allUsers);
 
-router.post("/profile/update", user_auth, profile_update);
+router.put("/profile/update", user_auth, profile_update);
+
+router.post("/profile/picture", user_auth, upload.single("file"), profile_picture);
 
 module.exports = router;
