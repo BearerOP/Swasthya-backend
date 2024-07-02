@@ -1,7 +1,6 @@
 const user_model = require("../models/user_model");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
-const axios = require("axios");
 const TeleSignSDK = require("telesignsdk");
 
 exports.user_login = async (req, res) => {
@@ -266,4 +265,15 @@ exports.allUsers = async(req,res)=>{
     };
     
   }
+}
+
+exports.profile_update = async (req,res)=>{
+  const user = req.user;
+  if (!user) {
+    return {
+      success: false,
+      message: "User not found",
+    };
+    }
+
 }

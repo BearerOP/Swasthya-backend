@@ -15,7 +15,7 @@ async function user_auth(req, res, next) {
       return res.status(401).json({ message: "User is not logged in" });
     }
     const jwtPassword = process.env.SECRET_KEY;
-    const decode = jwt.verify(token, jwtPassword);
+    const decode = await jwt.verify(token, jwtPassword);
     let user = await user_model
       .findOne({ _id: decode.id })
       .select("-password -auth_key -notificationToken")
