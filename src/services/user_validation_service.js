@@ -320,7 +320,3 @@ exports.profile_update = async (req, res) => {
     };
   }
 };
-
-exports.profile_picture = async (req, res) => {
-  
-}
