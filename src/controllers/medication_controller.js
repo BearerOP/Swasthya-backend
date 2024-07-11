@@ -3,6 +3,7 @@ const {
   delete_medication,
   update_medication,
   view_medication,
+  view_all_medication,
 } = require("../services/medication_service.js");
 
 exports.create_medication = async (req, res) => {
@@ -21,6 +22,19 @@ exports.create_medication = async (req, res) => {
 exports.view_medication = async (req, res) => {
   try {
     const data = await view_medication(req, res);
+    if (data.success) {
+      res.status(200).json(data);
+    } else {
+      res.status(500).json(data);
+    }
+  } catch (error) {
+    console.log(error)
+    res.status(500).json(error);
+  }
+};
+exports.view_all_medication = async (req, res) => {
+  try {
+    const data = await view_all_medication(req, res);
     if (data.success) {
       res.status(200).json(data);
     } else {

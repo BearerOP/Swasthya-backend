@@ -1,3 +1,4 @@
+const mongoose = require("mongoose");
 const medication_model = require("../models/medication_model");
 const reminderModel = require("../models/reminder_model");
 const { scheduleReminder } = require("../../public/utils/scheduler");
@@ -145,5 +146,60 @@ const scheduleMedicationReminders = async (medicationRecords, user_id) => {
     }
   } catch (error) {
     console.log(error);
+  }
+};
+
+
+exports.view_medication = async (req, res) => {
+  try {
+    const user_id = req.user._id;
+    const medication_id = new mongoose.Types.ObjectId(req.query.medication_id);
+    // console.log(medication_id);
+    let allMedication = await medication_model.findOne({ user_id: user_id });
+    // console.log(allMedication);
+
+    let queryMedication={}
+    allMedication.record.forEach((medication)=>{
+      if(medication._id.equals(medication_id)){
+        queryMedication=medication
+      }
+    })
+    if(!queryMedication){
+      return{
+        success:false,
+        message:"Medication not found"
+      }
+    }
+    return{
+      success:true,
+      message:"Fetched Medication successfully",
+      medication:queryMedication
+    }
+
+  } catch (error) {
+    return {
+      success: false,
+      message: error.message,
+    };
+  }
+}
+
+exports.view_all_medication = async (req, res) => {
+  try {
+    const user_id = req.user._id;
+    const allMedication = await medication_model.find({ user_id: user_id });
+    if (!allMedication) {
+      return { success: false, message: "No Medication Found" };
+    }
+    return {
+      success: true,
+      allMedication,
+      message: "All Medications fetched succesfully",
+    };
+  } catch (error) {
+    return {
+      success: false,
+      message: error.message,
+    };
   }
 };
