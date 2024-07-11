@@ -14,7 +14,7 @@ const {
 
 reminder_router.post("/medication/create", user_auth, create_medication);
 
-// reminder_router.post("/medication/delete", user_auth, delete_medication);
+reminder_router.delete("/medication/delete", user_auth, delete_medication);
 
 // reminder_router.post("/medication/update", user_auth, update_medication);
 

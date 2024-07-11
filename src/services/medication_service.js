@@ -154,9 +154,7 @@ exports.view_medication = async (req, res) => {
   try {
     const user_id = req.user._id;
     const medication_id = new mongoose.Types.ObjectId(req.query.medication_id);
-    // console.log(medication_id);
     let allMedication = await medication_model.findOne({ user_id: user_id });
-    // console.log(allMedication);
 
     let queryMedication={}
     allMedication.record.forEach((medication)=>{
@@ -198,6 +196,44 @@ exports.view_all_medication = async (req, res) => {
     };
   } catch (error) {
     return {
+      success: false,
+      message: error.message,
+    };
+  }
+};
+
+
+exports.delete_medication = async (req, res) => {
+  try {
+    const user_id = req.user._id;
+    const medication_id = new mongoose.Types.ObjectId(req.query.medication_id);
+    let allMedication = await medication_model.findOne({ user_id: user_id });
+
+    if (!allMedication) {
+      return {
+        success: false,
+        message: "Medication record not found",
+      };
+    }
+
+    const medicationIndex = allMedication.record.findIndex((medication) => medication._id.equals(medication_id));
+
+    if (medicationIndex === -1) {
+      return{
+        success: false,
+        message: "Medication not found",
+      };
+    }
+
+    allMedication.record.splice(medicationIndex, 1);
+    await allMedication.save();
+
+    return{
+      success: true,
+      message: "Deleted Medication successfully",
+    };
+  } catch (error) {
+    return{
       success: false,
       message: error.message,
     };
