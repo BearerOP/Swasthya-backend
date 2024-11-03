@@ -113,8 +113,9 @@ function calculateCaloriesBurned(
 
 exports.view_step_daily = async (req, res) => {
   const user = req.user;
-  let date = new Date();
-  date.setHours(5,30,0,0)
+  let date = req.body.date ? new Date(req.body.date) : new Date();
+  date.setHours(5, 30, 0, 0);
+
   try {
     let stepData = await step_model.findOne({
       user_id: user._id,
@@ -128,13 +129,13 @@ exports.view_step_daily = async (req, res) => {
         success: true,
         message: "Daily increments fetched successfully",
         data: stepData,
-      };
+      }
     } else {
       return {
         success: false,
         message: "Daily increments not found",
         data: [],
-      };
+      }
     }
   } catch (error) {
     return {
