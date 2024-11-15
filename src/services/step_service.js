@@ -1,5 +1,4 @@
 const mongoose = require("mongoose");
-const user_model = require("../models/step_model.js");
 const step_model = require("../models/step_model.js");
 
 exports.add_step = async (req, res) => {
@@ -113,6 +112,8 @@ function calculateCaloriesBurned(
 
 exports.view_step_daily = async (req, res) => {
   const user = req.user;
+  console.log(typeof req.body.date);
+  
   let date = req.body.date ? new Date(req.body.date) : new Date();
   date.setHours(5, 30, 0, 0);
 

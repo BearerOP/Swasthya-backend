@@ -36,6 +36,7 @@ app.use("/", require("./src/routes/medication_routes.js"));
 app.use("/", require("./src/routes/leaderboard_routes.js"));
 app.use("/", require('./src/routes/request_routes.js'));
 app.use("/", require('./src/routes/relatives_routes.js'));
+app.use("/", require('./src/routes/water_routes.js'));
 
 let { connectDB } = require("./db/dbconnection.js");
 
