@@ -9,6 +9,7 @@ exports.user_login = async (req, res) => {
     const existingUser = await user_model.findOne({ mobile });
     if (!existingUser) {
       return {
+        status: 401,
         success: false,
         message: "Invalid mobile number or not registered!",
       };
@@ -20,15 +21,20 @@ exports.user_login = async (req, res) => {
     );
 
     if (!isPasswordValid) {
-      return res.status(403).json({
+      return {
+        status: 401,
         success: false,
         message: "Invalid mobile number or password",
-      });
+      };
     }
 
     const token = jwt.sign({ id: existingUser._id }, process.env.SECRET_KEY);
     if (!token) {
-      return res.json({ message: " Token generation failed" });
+      return {
+        status: 500,
+        success: false,
+        message: " Token generation failed"
+       };
     }
     // Set the token to cookies
     res.cookie("token", token);
@@ -39,19 +45,24 @@ exports.user_login = async (req, res) => {
     );
 
     if (!authKeyInsertion) {
-      return res.json({ message: "Token updation failed" });
+      return { 
+        status: 500,
+        success: false,
+        message: "Token updation failed" 
+      };
     }
 
     return {
+      status: 200,
       message: "User logged in successfully",
       success: true,
       token,
     };
   } catch (error) {
-    console.log(error);
     return {
       message: error.message || "Internal server error",
       success: false,
+      status: 500,
     };
   }
 };
@@ -91,18 +102,20 @@ exports.user_register = async (req, res) => {
 
     if (newUser) {
       return {
+        status: 200,
         message: "User created successfully",
         success: true,
       };
     } else {
       return {
+        status: 500,
         message: "User creation failed",
         success: false,
       };
     }
   } catch (error) {
-    console.log(error);
     return {
+      status: 500,
       message: error.message || "Internal server error",
       success: false,
     };
@@ -119,18 +132,20 @@ exports.user_logout = async (req, res) => {
     res.clearCookie("token");
     if (currentUser) {
       return {
+        status: 200,
         success: true,
         message: "User logged out successfully",
       };
     } else {
       return {
+        status: 500,
         success: false,
         message: "User logout failed",
       };
     }
   } catch (error) {
-    console.log(error);
     return {
+      status: 500,
       message: error.message || "Internal server error",
       success: false,
     };
@@ -168,6 +183,7 @@ exports.sendOtp = async (req, res) => {
       });
 
       return {
+        status: 200,
         success: true,
         message: "OTP sent successfully",
         data: response,
@@ -176,6 +192,7 @@ exports.sendOtp = async (req, res) => {
     } catch (error) {
       console.error("Unable to send SMS. Error:\n\n" + error);
       return {
+        status: 500,
         success: false,
         message: "Failed to send OTP",
         error: error,

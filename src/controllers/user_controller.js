@@ -15,12 +15,12 @@ exports.user_login = async (req, res) => {
   try {
     const data = await user_login(req, res);
     if (data.success) {
-      res.status(200).json(data);
+      res.status(data.status).json(data);
     } else {
-      res.status(403).json(data);
+      res.status(data.status).json(data);
     }
   } catch (error) {
-    console.log("Error:", error);
+    res.status(500).json({ message: "An unexpected error occurred" });
   }
 };
 
@@ -28,22 +28,25 @@ exports.user_register = async (req, res) => {
   try {
     const data = await user_register(req, res);
     if (data.success) {
-      res.status(200).json(data);
+      res.status(data.status).json(data);
     } else {
-      res.status(403).json(data);
+      res.status(data.status).json(data);
     }
   } catch (error) {
-    console.log("Error:", error);
+    res.status(500).json({ message: "An unexpected error occurred" });
   }
 };
 exports.user_logout = async (req, res) => {
   try {
     const data = await user_logout(req, res);
     if (data.success) {
-      res.status(200).json(data);
+      res.status(data.status).json(data);
+    }
+    else {
+      res.status(data.status).json(data);
     }
   } catch (error) {
-    console.log("Error: ", error);
+    res.status(500).json({ message: "An unexpected error occurred" });
   }
 };
 
@@ -51,12 +54,12 @@ exports.sendOtp = async (req, res) => {
   try {
     const data = await sendOtp(req, res);
     if (data.success) {
-      res.status(200).json({ data: data.data });
+      res.status(data.status).json(data);
     } else {
-      res.status(500).json(data.data);
+      res.status(data.status).json(data.data);
     }
   } catch (error) {
-    console.log("Error: ", error);
+   res.status(500).json({ message: "An unexpected error occurred" });
   }
 };
 
