@@ -7,6 +7,7 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "npx nodemon"
   },
+ "type": "commonjs",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/BearerOP/heal-app.git"
@@ -34,11 +35,13 @@
     "node-schedule": "^2.1.1",
     "nodemon": "^3.1.1",
     "otp-generation": "^1.0.5",
+    "redis": "^4.7.0",
     "short-unique-id": "^5.2.0",
     "swagger-autogen": "^2.23.7",
     "swagger-jsdoc": "^6.2.8",
     "swagger-ui-express": "^5.0.0",
-    "telesignsdk": "^3.0.0"
+    "telesignsdk": "^3.0.0",
+    "util": "^0.12.5"
   },
   "author": "BearerOP",
   "license": "ISC",
