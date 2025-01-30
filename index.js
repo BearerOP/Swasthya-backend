@@ -41,6 +41,6 @@ app.use("/", require('./src/routes/water_routes.js'));
 let { connectDB } = require("./db/dbconnection.js");
 
 connectDB();
-app.listen(process.env.port, () => {
-  console.log(`app listening on ${process.env.host}`);
+app.listen(process.env.PORT, () => {
+  console.log(`app listening on ${process.env.HOST}:${process.env.PORT}`);
 });
