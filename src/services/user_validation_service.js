@@ -3,6 +3,10 @@ const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const TeleSignSDK = require("telesignsdk");
 
+const { getdata } = require("../Utils/redis");
+const sendOtp = require("../Utils/sendOtp");
+const { getOtp } = require("../Utils/mapstore");
+
 exports.user_login = async (req, res) => {
   try {
     const { mobile, password, fcm_token } = req.body;
@@ -34,7 +38,7 @@ exports.user_login = async (req, res) => {
         status: 500,
         success: false,
         message: " Token generation failed"
-       };
+      };
     }
     // Set the token to cookies
     res.cookie("token", token);
@@ -45,10 +49,10 @@ exports.user_login = async (req, res) => {
     );
 
     if (!authKeyInsertion) {
-      return { 
+      return {
         status: 500,
         success: false,
-        message: "Token updation failed" 
+        message: "Token updation failed"
       };
     }
 
@@ -152,78 +156,105 @@ exports.user_logout = async (req, res) => {
   }
 };
 
-const customerId = process.env.CUSTOMER_ID;
-const apiKey = process.env.API_KEY;
 
-const client = new TeleSignSDK(customerId, apiKey);
 
 exports.sendOtp = async (req, res) => {
   const mobile = req.body.mobile;
-
-  // Generate a random 6-digit OTP
-  const otp = Math.floor(100000 + Math.random() * 900000);
-  const message = `Your OTP-Verification OTP is ${otp}`;
-  const messageType = "ARN";
-
-  async function sendOtp(mobile) {
-    try {
-      const response = await new Promise((resolve, reject) => {
-        client.sms.message(
-          (error, responseBody) => {
-            if (error) {
-              reject(error);
-            } else {
-              resolve(responseBody);
-            }
-          },
-          mobile,
-          message,
-          messageType
-        );
-      });
-
+  try {
+    const existingUser = await user_model.findOne({ mobile });
+    if (existingUser) {
       return {
-        status: 200,
-        success: true,
-        message: "OTP sent successfully",
-        data: response,
-        otp: otp,
+        status: 400,
+        success: false,
+        message: "User already exists",
       };
-    } catch (error) {
-      console.error("Unable to send SMS. Error:\n\n" + error);
+    }
+    const result = await sendOtp(mobile);
+    console.log("result", result);
+    
+    if (!result.success) {
       return {
         status: 500,
         success: false,
         message: "Failed to send OTP",
-        error: error,
       };
     }
-  }
 
-  try {
-    const result = await sendOtp(mobile);
     if (result.success) {
       return {
+        status: 200,
         success: true,
         message: "OTP sent successfully",
-        data: result,
       };
     } else {
       return {
+        status: 500,
         success: false,
         message: "Failed to send OTP",
-        error: result,
       };
     }
   } catch (error) {
     console.error("Error: ", error);
     return {
+      status: 500,
+      success: false,
+      message: "An unexpected error occurred",
+    };
+  }
+};
+
+exports.verifyOtp = async (req, res) => {
+  const { mobile, otp } = req.body;
+ const verifyOtp = await getOtp(mobile);
+  if (!verifyOtp) {
+    return {
+      status: 400,
+      success: false,
+      message: "OTP expired",
+    };
+  }
+
+  try {
+    if (!mobile || !otp) {
+      return {
+        status: 400,
+        success: false,
+        message: "Mobile number or OTP is missing",
+      };
+    }
+    const existingUser = await user_model.findOne({ mobile });
+    if (existingUser) {
+      return {
+        status: 400,
+        success: false,
+        message: "User already exists",
+      };
+    }
+
+    if (verifyOtp !== otp) {
+      return {
+        status: 400,
+        success: false,
+        message: "Invalid OTP",
+      };
+    }
+    return {
+      status: 200,
+      success: true,
+      message: "OTP verified successfully",
+    };
+
+
+  } catch (error) {
+    return {
+      status: 500,
       success: false,
       message: "An unexpected error occurred",
       error: error,
     };
+
   }
-};
+}
 
 exports.user_profile = async (req, res) => {
   const user = req.user;

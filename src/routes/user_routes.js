@@ -15,7 +15,8 @@ const {
   user_profile,
   allUsers,
   profile_update,
-  profile_picture
+  profile_picture,
+  verifyOtp
 } = require("../controllers/user_controller.js");
 
 router.post("/login", user_login);
@@ -25,6 +26,8 @@ router.post("/register", user_register);
 router.post("/logout", user_auth, user_logout);
 
 router.post("/sendOtp", sendOtp);
+
+router.post("/verifyOtp", verifyOtp);
 
 router.get("/profile", user_auth, user_profile);
 
