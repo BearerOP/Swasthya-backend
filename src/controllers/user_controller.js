@@ -82,10 +82,13 @@ exports.user_profile = async (req, res) => {
   try {
     const data = await user_profile(req, res);
     if (data.success) {
-      res.status(200).json(data);
+      res.status(data.status).json(data);
+    }
+    else {
+      res.status(data.status).json(data);
     }
   } catch (error) {
-    console.log("Error: ", error);
+    res.status(500).json({ message: "An unexpected error occurred" });
   }
 };
 

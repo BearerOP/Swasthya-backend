@@ -82,15 +82,25 @@ exports.user_register = async (req, res) => {
     gender,
     food_preference,
   } = req.body;
+  console.log(req.body);
+  
   try {
+    if (!username || !mobile || !password || !weight || !height || !dob) {
+      return {
+        status: 400,
+        message: "Missing required fields",
+        success: false,
+      };
+    }
     const existingUser = await user_model.findOne({ mobile });
     if (existingUser) {
       return {
+        status: 400,
         message: "User already exists",
         success: false,
       };
     }
-
+    
     const hashedPassword = await bcrypt.hash(password, 10);
 
     const newUser = await user_model.create({
@@ -103,7 +113,6 @@ exports.user_register = async (req, res) => {
       gender,
       food_preference,
     });
-
     if (newUser) {
       return {
         status: 200,
@@ -155,9 +164,6 @@ exports.user_logout = async (req, res) => {
     };
   }
 };
-
-
-
 exports.sendOtp = async (req, res) => {
   const mobile = req.body.mobile;
   try {
@@ -170,7 +176,6 @@ exports.sendOtp = async (req, res) => {
       };
     }
     const result = await sendOtp(mobile);
-    console.log("result", result);
     
     if (!result.success) {
       return {
@@ -261,21 +266,22 @@ exports.user_profile = async (req, res) => {
   try {
     if (!user) {
       return {
+        status: 400,
         success: false,
         message: "User not found",
       };
     }
 
     return {
+      status: 200,
       success: true,
-      data: user,
+      user,
     };
   } catch (error) {
-    console.error("Error: ", error);
     return {
+      status: 500,
       success: false,
       message: "An unexpected error occurred",
-      error: error,
     };
   }
 };
