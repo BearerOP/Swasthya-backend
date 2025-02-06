@@ -16,7 +16,8 @@ const {
   allUsers,
   profile_update,
   profile_picture,
-  verifyOtp
+  verifyOtp,
+  update_Password
 } = require("../controllers/user_controller.js");
 
 router.post("/login", user_login);
@@ -28,6 +29,8 @@ router.post("/logout", user_auth, user_logout);
 router.post("/sendOtp", sendOtp);
 
 router.post("/verifyOtp", verifyOtp);
+
+router.post("/updatePassword",user_auth, update_Password);
 
 router.get("/profile", user_auth, user_profile);
 

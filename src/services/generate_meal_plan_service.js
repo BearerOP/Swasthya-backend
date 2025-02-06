@@ -186,87 +186,60 @@ exports.getPrompt = async (req, res) => {
   }
 };
 
-/*
- * Install the Generative AI SDK
- *
- * $ npm install @google/generative-ai
- *
- * See the getting started guide for more information
- * https://ai.google.dev/gemini-api/docs/get-started/node
- */
+exports.makeweekMealPlan = async (req, res) => {
+  const user_id = req.user._id;
+  const {protein,Calories,foodType} = req.query;
+  // const apiKey = process.env.GEMINAI_API_KEY;
 
-const {
-  GoogleGenerativeAI,
-  HarmCategory,
-  HarmBlockThreshold,
-} = require("@google/generative-ai");
-// const { GoogleAIFileManager } = require("@google/generative-ai/files");
 
-const apiKey = "AIzaSyATqmJGmCwbmKS45z9_kpkHr3J9X7X6EAA";
-const genAI = new GoogleGenerativeAI(apiKey);
-// const fileManager = new GoogleAIFileManager(apiKey);
+  try {
 
-/**
- * Uploads the given file to Gemini.
- *
- * See https://ai.google.dev/gemini-api/docs/prompting_with_media
- */
-async function uploadToGemini(path, mimeType) {
-  const uploadResult = await fileManager.uploadFile(path, {
-    mimeType,
-    displayName: path,
-  });
-  const file = uploadResult.file;
-  console.log(`Uploaded file ${file.displayName} as: ${file.name}`);
-  return file;
+    
+    
+  } catch (error) {
+    console.error("Error: ", error);
+    return {
+      status: 500,
+      success: false,
+      message: "An unexpected error occurred",
+    };
+    
+  }
+
+  
 }
 
-const model = genAI.getGenerativeModel({
-  model: "gemini-1.5-pro",
-});
+exports.getOneMeal = async (req, res) => {
+  const { protein, Calories, foodType } = req.query;
+  console.log(protein, Calories, foodType);
 
-const generationConfig = {
-  temperature: 1,
-  topP: 0.95,
-  topK: 64,
-  maxOutputTokens: 8192,
-  responseMimeType: "text/plain",
-};
+  try {
+    const url = `https://api.edamam.com/api/recipes/v2?type=public&app_id=${process.env.EDAMAM_APP_ID}&app_key=${process.env.EDAMAM_APP_KEY}&calories=${Calories}&protein=${protein}&cuisineType=Indian&health=${foodType}`;
 
-const safetySettings = {
-  blockedCategories: [HarmCategory.Hate, HarmCategory.Violence, HarmCategory.SelfHarm],
-  blockThreshold: HarmBlockThreshold.LOW,
-};
-
-async function run(inputText) {
-  // TODO Make these files available on the local file system
-  // You may need to update the file paths
-  const files = [
-    await uploadToGemini("image_recipe_creator1.jpeg", "image/jpeg"),
-  ];
-
-  const chatSession = model.startChat({
-    generationConfig,
-    safetySettings,
-    history: [
-      {
-        role: "user",
-        parts: [
-          { text: inputText },
-          {
-            fileData: {
-              mimeType: files[0].mimeType,
-              fileUri: files[0].uri,
-            },
-          },
-        ],
+    const response = await axios.get(url, {
+      headers: {
+        "Edamam-Account-User": process.env.EDAMAM_ACCOUNT_USERNAME,
       },
-    ],
-  });
-
-  const result = await chatSession.sendMessage(inputText);
-  console.log(result.response.text());
-}
-
-// Example usage:
-
+    });
+        if (response.status!==200) {
+          return {
+            status: 500,
+            success: false,
+            message: "An unexpected error occurred",
+          };
+        }
+    return {
+      status: 200,
+      success: true,
+      data: response.data,
+    }
+  } catch (error) {
+    // Send a proper error response to the client
+    return{
+      status: 500,
+      success: false,
+      message: "An unexpected error occurred",
+      error: error.message,
+    }
+  }
+};

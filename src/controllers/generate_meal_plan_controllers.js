@@ -2,6 +2,7 @@ const {
   generateMealPlan,
   view_MealPlan,
   getPrompt,
+  getOneMeal,
 } = require("../services/generate_meal_plan_service");
 
 exports.generateMealPlan = async (req, res) => {
@@ -41,3 +42,16 @@ exports.getPrompt = async (req, res) => {
     console.log("Error:", error);
   }
 };
+
+exports.getOneMeal = async (req, res) => {
+  try {
+    const data = await getOneMeal(req, res);
+    if (data.success) {
+      res.status(data.status).json(data);
+    } else {
+      res.status(data.status).json(data);
+    }
+  } catch (error) {
+    res.status(500).json({ message: "An unexpected error occurred" });
+  }
+}
