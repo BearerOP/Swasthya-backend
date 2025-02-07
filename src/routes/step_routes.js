@@ -10,12 +10,12 @@ const {
     view_step_monthly
 } = require("../controllers/step_controller.js");
 
-router.post("/step/add", user_auth, add_step);
+router.post("/add", user_auth, add_step);
 
-router.get("/step/view/daily", user_auth, view_step_daily);
+router.get("/view/daily", user_auth, view_step_daily);
 
-router.get("/step/view/weekly", user_auth, view_step_weekly);
+router.get("/view/weekly", user_auth, view_step_weekly);
 
-router.get("/step/view/monthly", user_auth, view_step_monthly);
+router.get("/view/monthly", user_auth, view_step_monthly);
 
 module.exports = router
