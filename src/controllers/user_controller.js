@@ -7,6 +7,7 @@ const {
   allUsers,
   profile_update,
   verifyOtp,
+  update_Password,
 
 } = require("../services/user_validation_service.js");
 
@@ -51,7 +52,7 @@ exports.user_logout = async (req, res) => {
   }
 };
 
-exports.sendOtp = async (req, res) => {
+exports.sendOtp = async (req, res) => {  
   try {
     const data = await sendOtp(req, res);
     if (data.success) {
@@ -59,15 +60,26 @@ exports.sendOtp = async (req, res) => {
     } else {
       res.status(data.status).json(data);
     }
-  } catch (error) {
-    console.log("Error: ", error);
-    
+  } catch (error) {    
     res.status(500).json({ message: "An unexpected error occurred" });
   }
 };
 exports.verifyOtp = async (req, res) => {
   try {
     const data = await verifyOtp(req, res);
+    if (data.success) {
+      res.status(data.status).json(data);
+    } else {
+      res.status(data.status).json(data);
+    }
+  } catch (error) {
+    res.status(500).json({ message: "An unexpected error occurred" });
+  }
+}
+
+exports.update_Password = async (req, res) => {
+  try {
+    const data = await update_Password(req, res);
     if (data.success) {
       res.status(data.status).json(data);
     } else {
@@ -130,3 +142,4 @@ exports.profile_picture = async (req, res) => {
     console.log("Error:", error);
   }
 };
+

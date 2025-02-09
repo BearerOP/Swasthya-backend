@@ -83,7 +83,7 @@ exports.user_register = async (req, res) => {
     food_preference,
   } = req.body;
   console.log(req.body);
-  
+
   try {
     if (!username || !mobile || !password || !weight || !height || !dob) {
       return {
@@ -100,7 +100,7 @@ exports.user_register = async (req, res) => {
         success: false,
       };
     }
-    
+
     const hashedPassword = await bcrypt.hash(password, 10);
 
     const newUser = await user_model.create({
@@ -175,8 +175,10 @@ exports.sendOtp = async (req, res) => {
         message: "User already exists",
       };
     }
-    const result = await sendOtp(mobile);
     
+    
+    const result = await sendOtp(mobile);
+
     if (!result.success) {
       return {
         status: 500,
@@ -210,7 +212,7 @@ exports.sendOtp = async (req, res) => {
 
 exports.verifyOtp = async (req, res) => {
   const { mobile, otp } = req.body;
- const verifyOtp = await getOtp(mobile);
+  const verifyOtp = await getOtp(mobile);
   if (!verifyOtp) {
     return {
       status: 400,
@@ -374,3 +376,65 @@ exports.profile_update = async (req, res) => {
     };
   }
 };
+
+exports.update_Password = async (req, res) => {
+  const user = req.user;
+  const { oldPassword, newPassword } = req.body;
+console.log(user);
+
+  try {
+    const existingUser = await user_model.findById(user._id);
+    if (!existingUser) {
+      return {
+        status: 400,
+        success: false,
+        message: "User not found",
+      };
+    }
+
+    const isPasswordValid = await bcrypt.compare(
+      oldPassword,
+      existingUser.password
+    );
+    console.log(isPasswordValid);
+    
+    if (!isPasswordValid) {
+      return {
+        status: 400,
+        success: false,
+        message: "Invalid old password",
+      };
+    }
+
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+    const updatedPassword = await user_model.findByIdAndUpdate(
+      user._id,
+      { password: hashedPassword },
+      { new: true }
+    );
+
+    if (!updatedPassword) {
+      return {
+        status: 500,
+        success: false,
+        message: "Password not updated",
+      };
+    }
+    return {
+      status: 200,
+      success: true,
+      message: "Password updated successfully",
+    };
+
+  } catch (error) {
+    console.log("Error:", error);
+    
+    return {
+      status: 500,
+      success: false,
+      message: "An unexpected error occurred",
+      error: error,
+    };
+
+  }
+}

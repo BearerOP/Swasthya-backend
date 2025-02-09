@@ -9,10 +9,10 @@ const {
   overall_ranking
 } = require("../controllers/leaderboard_controller.js");
 
-router.post("/leaderboard/overall", user_auth, overall);
+router.post("/overall", user_auth, overall);
 
-router.post("/leaderboard/relatives", user_auth, relatives);
+router.post("/relatives", user_auth, relatives);
 
-router.post('/leaderboard/overall/ranking',user_auth,overall_ranking)
+router.post('/overall/ranking',user_auth,overall_ranking)
 
 module.exports = router;
