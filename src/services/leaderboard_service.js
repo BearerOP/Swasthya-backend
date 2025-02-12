@@ -32,6 +32,7 @@ exports.overall = async (req, res) => {
       dateFilter = { $gte: startOfMonth, $lte: now };
     } else {
       return {
+        status: 400,
         success: false,
         message: "Invalid period specified!",
       };
@@ -40,6 +41,7 @@ exports.overall = async (req, res) => {
     const allUsers = await user_model.find({});
     if (!allUsers || allUsers.length === 0) {
       return {
+        status: 404,
         success: false,
         message: "Users not found!",
       };
@@ -79,9 +81,10 @@ exports.overall = async (req, res) => {
     leaderboard.sort((a, b) => b.totalSteps - a.totalSteps);
 
     return {
+      status: 200,
       success: true,
       message: "Overall leaderboard fetched successfully!",
-      data: leaderboard,
+     leaderboard,
     };
   } catch (error) {
     console.error("Error fetching overall leaderboard:", error);

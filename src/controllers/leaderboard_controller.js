@@ -8,24 +8,13 @@ exports.overall = async (req, res) => {
     try {
         const data = await overall(req,res);
         if(data.success){
-            res.status(200).json( {
-                success: data.success,
-                message:data.message,
-                data:data.data
-            })
+            res.status(data.status).json(data)
         }
         else{
-            res.status(500).json( {
-                success: data.success,
-                message:data.message,
-            })
+            res.status(data.status).json(data)
         }
     } catch (error) {
-        console.error("Error fetching overall leaderboard:", error);
-        res.status(500).json( {
-            success: false,
-            message: "Error fetching overall leaderboard",
-        })
+        res.status(500).json({message: "Error fetching overall leaderboard"})
     }
 }
 exports.relatives = async (req, res) => {
