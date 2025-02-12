@@ -28,6 +28,11 @@ app.use("/public", express.static("public"));
 app.use("/status",(req,res)=>{
 res.send("Welcome to the Slug Server")
 });
+app.use("/check",(req,res)=>{
+res.send("Slug Server running ......")
+});
+
+
 
 app.use("/user", require("./src/routes/user_routes.js"));
 app.use("/workout", require("./src/routes/workout_planner_routes.js"));
