@@ -26,11 +26,9 @@ app.use(express.static(path.join(__dirname, "/public")));
 app.use("/public", express.static("public"));
 
 app.use("/status",(req,res)=>{
-res.send("Welcome to the Slug Server")
+res.send("Slug Server is up and running");
 });
-app.use("/check",(req,res)=>{
-res.send("Slug Server running ......")
-});
+
 
 
 
