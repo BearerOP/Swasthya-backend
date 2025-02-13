@@ -6,7 +6,6 @@ on:
 
 jobs:
   build:
-
     runs-on: self-hosted
 
     strategy:
@@ -38,5 +37,13 @@ jobs:
     - name: Ensure PM2 is Installed
       run: npm install pm2 -g
     
-    - name: Restart Server with PM2
-      run: pm2 restart index.js
+    - name: Start or Restart Server with PM2 (Ecosystem)
+      run: |
+        if [ ! -f ecosystem.config.js ]; then
+          echo "module.exports = { apps: [{ name: 'swasthya-backend', script: 'index.js', env: { NODE_ENV: 'production' } }] };" > ecosystem.config.js
+        fi
+        if pm2 describe swasthya-backend > /dev/null; then
+          pm2 restart swasthya-backend --update-env
+        else
+          pm2 start ecosystem.config.js
+        fi
