@@ -1,49 +1,33 @@
+# This workflow will do a clean installation of node dependencies, cache/restore them, build the source code and run tests across different versions of node
+# For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-nodejs
+
 name: Node.js CI
 
 on:
   push:
-    branches: ["master"]
+    branches: [ "master" ]
 
 jobs:
   build:
+
     runs-on: self-hosted
 
     strategy:
       matrix:
         node-version: [22.x]
+        # See supported Node.js release schedule at https://nodejs.org/en/about/releases/
 
     steps:
     - uses: actions/checkout@v4
-    
     - name: Use Node.js ${{ matrix.node-version }}
       uses: actions/setup-node@v4
       with:
         node-version: ${{ matrix.node-version }}
         cache: 'npm'
-    
-    - name: Fix npm permissions
-      run: |
-        sudo chown -R $USER:$USER ~/.npm
-
-    - name: Install Dependencies (with timeout)
-      run: npm ci --verbose
-      timeout-minutes: 5
-    
-    - name: Create .env File
-      run: | 
+    - run: npm ci
+    - run: | 
         touch .env
-        echo "${{ secrets.PRODUCTION }}" > .env
-    
-    - name: Ensure PM2 is Installed
-      run: npm install pm2 -g
-    
-    - name: Start or Restart Server with PM2 (Ecosystem)
-      run: |
-        if [ ! -f ecosystem.config.js ]; then
-          echo "module.exports = { apps: [{ name: 'swasthya-backend', script: 'index.js', env: { NODE_ENV: 'production' } }] };" > ecosystem.config.js
-        fi
-        if pm2 describe swasthya-backend > /dev/null; then
-          pm2 restart swasthya-backend --update-env
-        else
-          pm2 start ecosystem.config.js
-        fi
+        echo "${{secrets.PRODUCTION}}" > .env
+
+    - run: pm2 start index.js
+
