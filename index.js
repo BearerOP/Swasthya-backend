@@ -30,6 +30,8 @@ res.send("Swasthya Server is up and running.....");
 });
 
 
+app.use("/updateTime", require("./src/Utils/serverversion.js")); 
+
 app.use("/user", require("./src/routes/user_routes.js"));
 app.use("/workout", require("./src/routes/workout_planner_routes.js"));
 app.use("/goals", require("./src/routes/goal_setting_routes.js"));
