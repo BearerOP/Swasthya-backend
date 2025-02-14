@@ -26,8 +26,9 @@ app.use(express.static(path.join(__dirname, "/public")));
 app.use("/public", express.static("public"));
 
 app.use("/status",(req,res)=>{
-res.send("Slug Server is up and running.....");
+res.send("Slug Server is up and running");
 });
+
 
 app.use("/user", require("./src/routes/user_routes.js"));
 app.use("/workout", require("./src/routes/workout_planner_routes.js"));
