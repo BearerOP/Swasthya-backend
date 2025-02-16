@@ -26,8 +26,11 @@ app.use(express.static(path.join(__dirname, "/public")));
 app.use("/public", express.static("public"));
 
 app.use("/status",(req,res)=>{
-res.send("Welcome to the Slug Server")
+res.send("Swasthya Server is up and running.....");
 });
+
+
+app.use("/updateTime", require("./src/Utils/serverversion.js")); 
 
 app.use("/user", require("./src/routes/user_routes.js"));
 app.use("/workout", require("./src/routes/workout_planner_routes.js"));
@@ -38,8 +41,8 @@ app.use("/Sleep", require("./src/routes/sleep_patterns_routes.js"));
 app.use("/meal", require("./src/routes/generate_meal_plan_routes.js"));
 app.use("/medication", require("./src/routes/medication_routes.js"));
 app.use("/leaderboard", require("./src/routes/leaderboard_routes.js"));
-app.use("/", require('./src/routes/request_routes.js'));
-app.use("/", require('./src/routes/relatives_routes.js'));
+app.use("/request", require('./src/routes/request_routes.js'));
+app.use("/relaties", require('./src/routes/relatives_routes.js'));
 app.use("/water", require('./src/routes/water_routes.js'));
 
 let { connectDB } = require("./db/dbconnection.js");

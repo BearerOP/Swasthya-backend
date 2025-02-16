@@ -1,5 +1,5 @@
 {
-  "name": "heal-app",
+  "name": "swasthya",
   "version": "1.0.0",
   "description": "---",
   "main": "index.js",
@@ -7,13 +7,12 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "npx nodemon"
   },
- "type": "commonjs",
+  "type": "commonjs",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/BearerOP/heal-app.git"
   },
   "dependencies": {
-    "@google/generative-ai": "^0.13.0",
     "axios": "^1.7.2",
     "bcryptjs": "^2.4.3",
     "body-parser": "^1.20.3",
