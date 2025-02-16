@@ -42,7 +42,7 @@ app.use("/meal", require("./src/routes/generate_meal_plan_routes.js"));
 app.use("/medication", require("./src/routes/medication_routes.js"));
 app.use("/leaderboard", require("./src/routes/leaderboard_routes.js"));
 app.use("/request", require('./src/routes/request_routes.js'));
-app.use("/relaties", require('./src/routes/relatives_routes.js'));
+app.use("/relatives", require('./src/routes/relatives_routes.js'));
 app.use("/water", require('./src/routes/water_routes.js'));
 
 let { connectDB } = require("./db/dbconnection.js");

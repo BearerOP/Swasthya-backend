@@ -6,6 +6,8 @@ const user_model = require("../src/models/user_model");
 async function user_auth(req, res, next) {
   // Implement user auth logic
   // const token = req.cookies.token;
+  // console.log(req);
+  
   try {
     const tokenHead = req.headers["authorization"];
     // console.log(tokenHead);
