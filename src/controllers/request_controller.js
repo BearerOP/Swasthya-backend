@@ -3,13 +3,13 @@ exports.send_request = async (req, res) => {
   try {
     const data = await send_request(req, res);
     if (data.success) {
-      res.status(200).json(data);
+      res.status(data.status).json(data);
     } else {
-      res.status(403).json(data);
-
+      res.status(data.status).json(data);
     }
   } catch (error) {
-    console.log("Error:", error);
+   res.status(403).json({message:"Internal server error",success:false});
+
   }
 };
 exports.alluser = async (req, res) => {

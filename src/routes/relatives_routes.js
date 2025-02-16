@@ -8,8 +8,8 @@ const {
   getRelativeMedication,
 } = require("../controllers/relatives_controller.js");
 
-router.get("/relatives/all", user_auth, getAllRelatives);
+router.get("/my_connections", user_auth, getAllRelatives);
 
-router.get("/relatives/medication", user_auth, getRelativeMedication);
+router.get("/medication", user_auth, getRelativeMedication);
 
 module.exports = router;

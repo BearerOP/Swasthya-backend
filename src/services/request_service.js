@@ -11,6 +11,7 @@ exports.send_request = async (req, res) => {
     // console.log(receiverData);
     if (!receiverData) {
       return {
+        status: 404,
         message: "Receiver not found",
         success: false,
       };
@@ -22,6 +23,7 @@ exports.send_request = async (req, res) => {
 
     if (existingRequest) {
       return {
+        status: 400,
         message: "Request already sent",
         success: false,
       };
@@ -36,6 +38,7 @@ exports.send_request = async (req, res) => {
 
     if (updatedReceiverData) {
       return {
+        status: 200,
         message: "Request sent successfully",
         success: true,
         data: updatedReceiverData.requests,
