@@ -14,9 +14,12 @@ exports.create_medication = async (req, res) => {
     start_date,
     description,
   } = req.body;
+  console.log(req.body);
+  
 
   if (!user_id) {
     return {
+      status: 404,
       success: false,
       message: "User not found",
     };
@@ -73,6 +76,7 @@ exports.create_medication = async (req, res) => {
 
       if (!updatedUser) {
         return {
+          status: 400,
           success: false,
           message: "Medication not added",
         };
@@ -86,6 +90,7 @@ exports.create_medication = async (req, res) => {
     await scheduleMedicationReminders(medicationRecords, user_id);
 
     return {
+      status: 200,
       success: true,
       message: "Medication added successfully",
       data: newUser || updatedUser,
@@ -93,6 +98,7 @@ exports.create_medication = async (req, res) => {
   } catch (error) {
     console.error(error);
     return {
+      status: 400,
       success: false,
       message: "An error occurred while adding medication",
       error: error.message,
