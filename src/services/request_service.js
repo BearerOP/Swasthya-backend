@@ -60,15 +60,19 @@ exports.send_request = async (req, res) => {
 
 exports.alluser = async (req, res) => {
   try {
-    const user = await user_model.find();
+    const user = await user_model.find({
+      _id: { $ne: req.user._id },
+    }).select("-password -auth_key -notificationToken").exec();
+    // Filter out users who are already in relation
+    const filteredUsers = user.filter(u => !req.user.relatives.includes(u._id));
     return {
       success: true,
-      data: user,
+      data: filteredUsers,
     };
   } catch (error) {
     return {
       success: false,
-      massege: error.massege,
+      message: error.message,
     };
   }
 };
@@ -79,20 +83,43 @@ exports.allRequest = async (req, res) => {
     if (user_id) {
       const user_data = await user_model.findOne({ _id: user_id });
 
-      // Populate sender's name for each request
+      // Populate sender's name for each request received
       let allSenderData = [];
       for (const sender of user_data.requests) {
         let senderData = await user_model
           .findOne({ _id: sender.sender_id })
           .select("-password -auth_key -notificationToken")
           .exec();
-        allSenderData.push(senderData);
-
+        allSenderData.push({
+          sender: senderData,
+          status: sender.status,
+        });
       }
+
+      // Find requests sent by the user
+      const sentRequests = await user_model.find({
+        "requests.sender_id": user_id,
+      }).select("-password -auth_key -notificationToken").exec();
+
+      let allSentRequests = [];
+      for (const receiver of sentRequests) {
+        const request = receiver.requests.find((req) =>
+          req.sender_id.equals(user_id)
+        );
+        // Check if the receiver is already a relative
+        if (!user_data.relatives.includes(receiver._id)) {
+          allSentRequests.push({
+            receiver: receiver,
+            status: request.status,
+          });
+        }
+      }
+
       return {
         success: true,
-        message:"All Relatives' Requests fetched",
-        data: allSenderData,
+        message: "All requests fetched",
+        receivedRequests: allSenderData,
+        sentRequests: allSentRequests,
       };
     }
   } catch (error) {

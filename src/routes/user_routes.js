@@ -24,7 +24,7 @@ router.post("/login", user_login);
 
 router.post("/register", user_register);
 
-router.post("/logout", user_auth, user_logout);
+router.get("/logout", user_auth, user_logout);
 
 router.post("/sendOtp", sendOtp);
 
