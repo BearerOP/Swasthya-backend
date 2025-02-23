@@ -4,14 +4,11 @@ const user_model = require("../src/models/user_model");
 
 // Middleware for handling auth
 async function user_auth(req, res, next) {
-  // Implement user auth logic
-  // const token = req.cookies.token;
-  // console.log(req);
-  
   try {
     const tokenHead = req.headers["authorization"];
-    // console.log(tokenHead);
-
+    if (!tokenHead) {
+      return res.status(401).json({ message: "User is not logged in" });
+    }
     const token = tokenHead.split(" ")[1];
     if (!token) {
       return res.status(401).json({ message: "User is not logged in" });
