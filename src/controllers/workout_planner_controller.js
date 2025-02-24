@@ -15,11 +15,18 @@ const {
 exports.exercises_all = async (req, res) => {
     try {
       const data = await exercises_all(req,res);
+      console.log("data from controller",data);
+      
       if (data.success) {
-        res.status(200).json(data.data);
+        res.status(data.status).json(data.data);
+      }
+      else{
+        res.status(data.status).json(data.data);
       }
     } catch (error) {
-      res.status(500).json(data);
+      console.log("error from controller",error);
+      
+        res.status(500).json({success: false, message:'Internal Server Error'});
     }
   };
 

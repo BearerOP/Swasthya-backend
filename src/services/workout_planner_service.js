@@ -1,6 +1,6 @@
 const user_model = require("../models/user_model");
 const axios = require("axios");
-const host = "https://exercisedb.p.rapidapi.com";
+const host = process.env.EXERCISE_API_HOST;
 
 exports.exercises_all = async (req, res) => {
   const options = {
@@ -11,18 +11,22 @@ exports.exercises_all = async (req, res) => {
       offset: "0",
     },
     headers: {
-      "x-rapidapi-key": process.env.x_rapidapi_key,
+      "x-rapidapi-key": process.env.EXERCISE_API_KEY,
       "x-rapidapi-host": "exercisedb.p.rapidapi.com",
     },
   };
   try {
     const response = await axios.request(options);
+    console.log("response", response.data);
+    
     return {
+      status: 200,
       success: true,
       data: response.data,
     };
   } catch (error) {
     return {
+      status: 500,
       success: false,
       data: error,
     };
@@ -39,7 +43,7 @@ exports.exercises_bodyPart = async (req, res) => {
       offset: "0",
     },
     headers: {
-      "x-rapidapi-key": process.env.x_rapidapi_key,
+      "x-rapidapi-key": process.env.EXERCISE_API_KEY,
       "x-rapidapi-host": "exercisedb.p.rapidapi.com",
     },
   };
