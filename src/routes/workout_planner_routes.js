@@ -21,7 +21,7 @@ router.get("/all_exercises", user_auth, exercises_all);
 
 router.post("/bodyPart", user_auth, exercises_bodyPart);
 
-router.get("/exercises/equipment", user_auth, exercises_equipment);
+router.post("/equipment", user_auth, exercises_equipment);
 
 router.get("/exercises/target_muscle", user_auth, exercises_target_muscle);
 

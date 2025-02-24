@@ -34,10 +34,13 @@ exports.exercises_bodyPart = async (req, res) => {
     try {
       const data = await exercises_bodyPart(req,res);
       if (data.success) {
-        res.status(200).json(data.data);
+        res.status(data.status).json(data.data);
+      }
+      else{
+        res.status(data.status).json(data.data);
       }
     } catch (error) {
-        res.status(500).json(data);
+        res.status(500).json({success: false, message:'Internal Server Error'});
     }
   };
 
@@ -45,10 +48,13 @@ exports.exercises_equipment = async (req, res) => {
     try {
       const data = await exercises_equipment(req,res);
       if (data.success) {
-        res.status(200).json(data.data);
+        res.status(data.status).json(data.data);
+      }
+      else{
+        res.status(data.status).json(data.data);
       }
     } catch (error) {
-        res.status(500).json(data);
+        res.status(500).json({success: false, message:'Internal Server Error'});
     }
   };
 
