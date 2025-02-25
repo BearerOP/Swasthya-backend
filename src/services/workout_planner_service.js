@@ -94,61 +94,63 @@ exports.exercises_equipment = async (req, res) => {
 };
 
 exports.exercises_target_muscle = async (req, res) => {
-  const target_muscle = req.body.target_muscle;
+  const target = req.body.target;
   const options = {
     method: "GET",
-    url: `${host}/exercises/target/${target_muscle}`,
+    url: `${host}/exercises/target/${target}`,
     params: {
       limit: "10",
       offset: "0",
     },
     headers: {
-      "x-rapidapi-key": process.env.x_rapidapi_key,
+      "x-rapidapi-key": process.env.EXERCISE_API_KEY,
       "x-rapidapi-host": "exercisedb.p.rapidapi.com",
     },
   };
   try {
     const response = await axios.request(options);
     return {
+      status: 200,
       success: true,
       data: response.data,
     };
   } catch (error) {
     return {
+      status: 500,
       success: false,
       data: error,
     };
   }
 };
 
-exports.exercises_target_muscle = async (req, res) => {
-  const target_muscle = req.body.target_muscle;
-  const options = {
-    method: "GET",
-    url: `https://exercisedb.p.rapidapi.com/exercises/target/${target_muscle}`,
-    params: {
-      limit: "10",
-      offset: "0",
-    },
-    headers: {
-      "x-rapidapi-key": process.env.x_rapidapi_key,
-      "x-rapidapi-host": "exercisedb.p.rapidapi.com",
-    },
-  };
+// exports.exercises_target_muscle = async (req, res) => {
+//   const target_muscle = req.body.target_muscle;
+//   const options = {
+//     method: "GET",
+//     url: `https://exercisedb.p.rapidapi.com/exercises/target/${target_muscle}`,
+//     params: {
+//       limit: "10",
+//       offset: "0",
+//     },
+//     headers: {
+//       "x-rapidapi-key": process.env.x_rapidapi_key,
+//       "x-rapidapi-host": "exercisedb.p.rapidapi.com",
+//     },
+//   };
 
-  try {
-    const response = await axios.request(options);
-    return {
-      success: true,
-      data: response.data,
-    };
-  } catch (error) {
-    return {
-      success: false,
-      data: error,
-    };
-  }
-};
+//   try {
+//     const response = await axios.request(options);
+//     return {
+//       success: true,
+//       data: response.data,
+//     };
+//   } catch (error) {
+//     return {
+//       success: false,
+//       data: error,
+//     };
+//   }
+// };
 
 exports.all_body_parts = async (req, res) => {
   const options = {

@@ -23,7 +23,7 @@ router.post("/bodyPart", user_auth, exercises_bodyPart);
 
 router.post("/equipment", user_auth, exercises_equipment);
 
-router.get("/exercises/target_muscle", user_auth, exercises_target_muscle);
+router.post("/target", user_auth, exercises_target_muscle);
 
 router.get("/all/body_parts", user_auth, all_body_parts);
 
