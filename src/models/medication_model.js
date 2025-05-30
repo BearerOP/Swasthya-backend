@@ -47,6 +47,13 @@ const medicationSchema = new mongoose.Schema({
         type: String,
         required: true,
       },
+      // medication for myself or for someone else
+      for: {
+        type: String,
+        required: true,
+        enum: ["myself", "relative"],
+      },
+
       forms: {
         type: String,
         required: true,
@@ -94,6 +101,8 @@ const medicationSchema = new mongoose.Schema({
           time: {
             type: Date,
             required: true,
+            default: Date.now,
+          
           },
         },
       ],

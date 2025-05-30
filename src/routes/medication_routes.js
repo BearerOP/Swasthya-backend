@@ -12,16 +12,14 @@ const {
     
 } = require("../controllers/medication_controller.js");
 
-reminder_router.post("/medication/create", user_auth, create_medication);
+reminder_router.use(user_auth);
 
-reminder_router.delete("/medication/delete", user_auth, delete_medication);
+reminder_router.post("/", create_medication);
+reminder_router.delete("/", delete_medication);
+reminder_router.get("/view", view_medication);
+reminder_router.get("/all", view_all_medication);
 
 // reminder_router.post("/medication/update", user_auth, update_medication);
-
-reminder_router.get("/medication/view", user_auth, view_medication);
-
-reminder_router.get("/medication/view/all", user_auth, view_all_medication);
-
 
 
 module.exports = reminder_router;
