@@ -4,7 +4,7 @@ const jwt = require("jsonwebtoken");
 const TeleSignSDK = require("telesignsdk");
 
 const { getdata } = require("../Utils/redis");
-const sendOtp = require("../Utils/sendOtp");
+const {sendOtp, verifyOtp} = require("../Utils/sendOtp");
 const { getOtp } = require("../Utils/mapstore");
 
 exports.user_login = async (req, res) => {
@@ -165,7 +165,7 @@ exports.user_logout = async (req, res) => {
   }
 };
 exports.sendOtp = async (req, res) => {
-  const mobile = req.body.mobile;
+  const {countryCode,mobile} = req.body;
   try {
     const existingUser = await user_model.findOne({ mobile });
     if (existingUser) {
@@ -201,7 +201,6 @@ exports.sendOtp = async (req, res) => {
       };
     }
   } catch (error) {
-    console.error("Error: ", error);
     return {
       status: 500,
       success: false,
@@ -212,24 +211,25 @@ exports.sendOtp = async (req, res) => {
 
 exports.verifyOtp = async (req, res) => {
   const { mobile, otp } = req.body;
-  const verifyOtp = await getOtp(mobile);
-  if (!verifyOtp) {
+  if (!mobile || !otp) {
     return {
       status: 400,
       success: false,
-      message: "OTP expired",
+      message: "Mobile number and OTP are required",
     };
   }
-
+  if (otp.length !== 6) {
+    return {
+      status: 400,
+      success: false,
+      message: "Invalid OTP format",
+    };
+  }
   try {
-    if (!mobile || !otp) {
-      return {
-        status: 400,
-        success: false,
-        message: "Mobile number or OTP is missing",
-      };
-    }
     const existingUser = await user_model.findOne({ mobile });
+    console.log("Existing User:", existingUser);
+    
+  
     if (existingUser) {
       return {
         status: 400,
@@ -237,12 +237,14 @@ exports.verifyOtp = async (req, res) => {
         message: "User already exists",
       };
     }
-
-    if (verifyOtp !== otp) {
+    const result =  await verifyOtp(mobile, otp);
+    console.log("OTP Verification Result:", result);
+    
+    if (!result.success) {
       return {
-        status: 400,
+        status: 500,
         success: false,
-        message: "Invalid OTP",
+        message: "OTP verification failed",
       };
     }
     return {
@@ -251,8 +253,9 @@ exports.verifyOtp = async (req, res) => {
       message: "OTP verified successfully",
     };
 
-
   } catch (error) {
+    console.log("Error:", error);
+    
     return {
       status: 500,
       success: false,
