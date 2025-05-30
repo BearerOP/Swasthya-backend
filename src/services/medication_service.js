@@ -13,6 +13,7 @@ exports.create_medication = async (req, res) => {
     times,
     start_date,
     description,
+    forWhom
   } = req.body;
 
   if (!user_id) {
@@ -42,6 +43,7 @@ exports.create_medication = async (req, res) => {
             times,
             start_date,
             description,
+            forWhom
           },
         ],
       });
@@ -67,6 +69,7 @@ exports.create_medication = async (req, res) => {
               times,
               start_date,
               description,
+              forWhom
             },
           },
         },

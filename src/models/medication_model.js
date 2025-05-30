@@ -41,18 +41,20 @@ const medicationSchema = new mongoose.Schema({
     ref: "User",
     required: true,
   },
+   // medication for myself or for someone else
+  forWhom: {
+    type: String,
+    required: true,
+    enum: ["myself", "relative"],
+  },
   record: [
     {
       medicine_name: {
         type: String,
         required: true,
       },
-      // medication for myself or for someone else
-      for: {
-        type: String,
-        required: true,
-        enum: ["myself", "relative"],
-      },
+     
+     
 
       forms: {
         type: String,
