@@ -18,7 +18,7 @@ const userSchema = new mongoose.Schema({
   },
   picture: {
     type: String,
-    default: "",
+    default: "https://res.cloudinary.com/dvo4tvvgb/image/upload/v1737770516/Profile/image.jpg",
   },
   weight: {
     type: Number, // User's weight in kilograms
