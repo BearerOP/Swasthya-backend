@@ -16,7 +16,7 @@ reminder_router.use(user_auth);
 
 reminder_router.post("/", create_medication);
 reminder_router.delete("/", delete_medication);
-reminder_router.get("/view", view_medication);
+reminder_router.get("/", view_medication);
 reminder_router.get("/all", view_all_medication);
 
 // reminder_router.post("/medication/update", user_auth, update_medication);

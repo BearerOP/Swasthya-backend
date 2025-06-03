@@ -319,7 +319,18 @@ exports.user_profile = async (req, res) => {
     return {
       status: 200,
       success: true,
-      user,
+      user:{
+        userId: user.userId,
+        username: user.username,
+        mobile: user.mobile,
+        email: user.email,
+        weight: user.weight,
+        height: user.height,
+        dob: user.dob,
+        gender: user.gender,
+        food_preference: user.food_preference,
+        profile_picture: user.profile_picture,
+      },
     };
   } catch (error) {
     return {

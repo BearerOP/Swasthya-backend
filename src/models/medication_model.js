@@ -47,15 +47,21 @@ const medicationSchema = new mongoose.Schema({
     required: true,
     enum: ["myself", "relative"],
   },
+  // If for relative, then relative_id is required
+  relative_id: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "User",
+    required: function () {
+      return this.forWhom === "relative"; // Only required if forWhom is 'relative'
+    },
+  },
+  // Record of medications
   record: [
     {
       medicine_name: {
         type: String,
         required: true,
       },
-     
-     
-
       forms: {
         type: String,
         required: true,
