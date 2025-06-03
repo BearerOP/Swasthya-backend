@@ -6,6 +6,7 @@ const TeleSignSDK = require("telesignsdk");
 const { getdata } = require("../Utils/redis");
 const {sendOtp, verifyOtp} = require("../Utils/sendOtp");
 const { getOtp } = require("../Utils/mapstore");
+const { generateUserId } = require("../Utils/generate");
 
 exports.user_login = async (req, res) => {
   try {
@@ -75,6 +76,7 @@ exports.user_register = async (req, res) => {
   const {
     username,
     mobile,
+    email,
     password,
     weight,
     height,
@@ -92,6 +94,41 @@ exports.user_register = async (req, res) => {
         success: false,
       };
     }
+    if (mobile.length < 10 || mobile.length > 15) {
+      return {
+        status: 400,
+        message: "Mobile number must be between 10 and 15 digits",
+        success: false,
+      };
+    }
+    if (password.length < 6 || password.length > 20) {
+      return {
+        status: 400,
+        message: "Password must be between 6 and 20 characters long",
+        success: false,
+      };
+    }
+    if (!weight || weight <= 0) {
+      return {
+        status: 400,
+        message: "Weight must be a positive number",
+        success: false,
+      };
+    }
+    if (!height || height <= 0) {
+      return {
+        status: 400,
+        message: "Height must be a positive number",
+        success: false,
+      };
+    }
+    if (!dob || isNaN(new Date(dob).getTime())) {
+      return {
+        status: 400,
+        message: "Invalid date of birth",
+        success: false,
+      };
+    }
     const existingUser = await user_model.findOne({ mobile });
     if (existingUser) {
       return {
@@ -104,8 +141,10 @@ exports.user_register = async (req, res) => {
     const hashedPassword = await bcrypt.hash(password, 10);
 
     const newUser = await user_model.create({
+      userId: generateUserId(),
       username,
       mobile,
+      email: email || 'user@example.com',
       password: hashedPassword,
       weight,
       height,

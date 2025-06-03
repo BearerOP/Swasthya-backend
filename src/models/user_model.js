@@ -1,6 +1,17 @@
 const mongoose = require("mongoose");
 
 const userSchema = new mongoose.Schema({
+  userId:{
+    type:String,
+    required: true,
+    unique: true,
+    validate: {
+      validator: function (v) {
+        return /^[a-zA-Z0-9]{8,}$/.test(v);
+      },
+      message: (props) => `${props.value} is not a valid userId! It must be at least 8 alphanumeric characters.`,
+    },
+  },
   username: {
     type: String,
     required: true,
@@ -11,7 +22,7 @@ const userSchema = new mongoose.Schema({
   },
   email:{
     type: String,
-    default: null,
+    default: 'user@example.com',
     unique: true,
     validate: {
       validator: function (v) {
@@ -46,7 +57,8 @@ const userSchema = new mongoose.Schema({
   },
   food_preference: {
     type: String,
-    enum: ["veg", "nonVeg"],
+    enum: ["vegetarian", "nonVegetarian", "vegan", "other"],
+    default: "other",
   },
   auth_key: {
     type: String,
