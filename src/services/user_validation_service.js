@@ -214,8 +214,13 @@ exports.sendOtp = async (req, res) => {
         message: "User already exists",
       };
     }
-    
-    
+    if (!mobile || mobile.length < 10 || mobile.length > 15) {
+      return {
+        status: 400,
+        success: false,
+        message: "Mobile number must be between 10 and 15 digits",
+      };
+    }
     const result = await sendOtp(mobile);
 
     if (!result.success) {
@@ -266,9 +271,6 @@ exports.verifyOtp = async (req, res) => {
   }
   try {
     const existingUser = await user_model.findOne({ mobile });
-    console.log("Existing User:", existingUser);
-    
-  
     if (existingUser) {
       return {
         status: 400,
@@ -277,7 +279,6 @@ exports.verifyOtp = async (req, res) => {
       };
     }
     const result =  await verifyOtp(mobile, otp);
-    console.log("OTP Verification Result:", result);
     
     if (!result.success) {
       return {
@@ -293,8 +294,6 @@ exports.verifyOtp = async (req, res) => {
     };
 
   } catch (error) {
-    console.log("Error:", error);
-    
     return {
       status: 500,
       success: false,

@@ -11,6 +11,9 @@ const app = express();
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(cookieParser());
+const user=require("./src/routes/user_routes.js");
+const workoutPlanner = require("./src/routes/workout_planner_routes.js");
+const connection = require("./src/routes/connection_routes.js")
 
 // // CORS configuration
 // const corsOptions = {
@@ -29,8 +32,8 @@ app.use("/status",(req,res)=>{
 res.send("Welcome to the Slug Server")
 });
 
-app.use("/user", require("./src/routes/user_routes.js"));
-app.use("/workout", require("./src/routes/workout_planner_routes.js"));
+app.use("/user", user);
+app.use("/workout", workoutPlanner);
 app.use("/goals", require("./src/routes/goal_setting_routes.js"));
 app.use("/step", require("./src/routes/step_routes.js"));
 app.use("/reminder", require("./src/routes/reminder_routes.js"));
@@ -38,7 +41,7 @@ app.use("/Sleep", require("./src/routes/sleep_patterns_routes.js"));
 app.use("/meal", require("./src/routes/generate_meal_plan_routes.js"));
 app.use("/medication", require("./src/routes/medication_routes.js"));
 app.use("/leaderboard", require("./src/routes/leaderboard_routes.js"));
-// app.use("/", require('./src/routes/request_routes.js'));
+app.use("/connection", connection);
 // app.use("/", require('./src/routes/relatives_routes.js'));
 app.use("/water", require('./src/routes/water_routes.js'));
 

@@ -68,7 +68,7 @@ const userSchema = new mongoose.Schema({
     type: String,
     default: null,
   },
-  relatives: [mongoose.Schema.Types.ObjectId],
+  connections: [mongoose.Schema.Types.ObjectId],
   requests: [
     {
       sender_id: {
@@ -76,8 +76,9 @@ const userSchema = new mongoose.Schema({
         ref: "User",
       },
       status: {
-        type: Boolean,
-        default: false,
+        type: String,
+        default: "pending",
+        enum: ["pending", "accepted", "rejected"],
       },
     },
   ],

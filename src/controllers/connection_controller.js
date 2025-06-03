@@ -1,4 +1,4 @@
-const { send_request ,alluser,allRequest,acceptRequest} = require("../services/request_service.js");
+const { send_request ,alluser,allRequest, update_Request} = require("../services/connection_service.js");
 exports.send_request = async (req, res) => {
   try {
     const data = await send_request(req, res);
@@ -40,9 +40,9 @@ exports.allRequest = async (req, res) => {
     console.log("Error:", error);
   }
 };
-exports.acceptRequest = async (req, res) => {
+exports.update_Request = async (req, res) => {
   try {
-    const data = await acceptRequest(req, res);
+    const data = await update_Request(req, res);
     if (data.success) {
       res.status(200).json(data);
     } else {
