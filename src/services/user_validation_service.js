@@ -62,6 +62,12 @@ exports.user_login = async (req, res) => {
       message: "User logged in successfully",
       success: true,
       token,
+      user: {
+        id: existingUser._id,
+        username: existingUser.username,
+        mobile: existingUser.mobile,
+        email: existingUser.email,
+      },
     };
   } catch (error) {
     return {
@@ -329,6 +335,7 @@ exports.user_profile = async (req, res) => {
         gender: user.gender,
         food_preference: user.food_preference,
         profile_picture: user.profile_picture,
+        created_at: user.created_at,
       },
     };
   } catch (error) {
