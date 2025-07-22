@@ -35,7 +35,7 @@ const userSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
-  picture: {
+  avatar: {
     type: String,
     default: "https://res.cloudinary.com/dvo4tvvgb/image/upload/v1737770516/Profile/image.jpg",
   },
@@ -80,6 +80,10 @@ const userSchema = new mongoose.Schema({
         default: "pending",
         enum: ["pending", "accepted", "rejected"],
       },
+      send_to:{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "User",
+      }
     },
   ],
   created_at: {

@@ -7,6 +7,7 @@ exports.send_request = async (req, res) => {
     const receiverId = req.body.receiverId;
 
     let receiverData = await user_model.findOne({ userId: receiverId });
+    let senderData = await user_model.findOne({ _id: senderID });
 
     // console.log(receiverData);
     if (!receiverData) {
@@ -30,8 +31,14 @@ exports.send_request = async (req, res) => {
     receiverData.requests.push({
       sender_id: senderID,
       status: "pending",
+      
     });
 
+    senderData.requests.push({
+      send_to: receiverData._id,
+      status: "pending",
+    });
+    const updatedSenderData = await senderData.save();
     const updatedReceiverData = await receiverData.save();
 
     if (updatedReceiverData) {
@@ -70,32 +77,138 @@ exports.alluser = async (req, res) => {
   }
 };
 
-exports.allRequest = async (req, res) => {
+exports.allConnections = async (req, res) => {
   try {
     const user_id = req.user._id;
     if (user_id) {
       const user_data = await user_model.findOne({ _id: user_id });
 
       // Populate sender's name for each request
-      let allSenderData = [];
-      for (const sender of user_data.requests) {
-        let senderData = await user_model
-          .findOne({ _id: sender.sender_id })
+      let allConnections = [];
+      for (const connection of user_data.connections) {
+        let connectionData = await user_model
+          .findOne({ _id: connection })
           .select("-password -auth_key -notificationToken")
           .exec();
-        allSenderData.push(senderData);
-
+        allConnections.push(connectionData);
       }
       return {
         success: true,
-        message:"All Relatives' Requests fetched",
-        data: allSenderData,
+        message:"All connections fetched successfully",
+        connections: allConnections,
       };
     }
   } catch (error) {
     return {
       success: false,
       message: error.message,
+    };
+  }
+};
+
+// Update: Remove request from user's requests array if accepted
+exports.update_Request = async (req, res) => {
+  try {
+    const user = req.user;
+    const { senderId, status } = req.body;
+
+    // Validate input
+    if (!senderId || !mongoose.Types.ObjectId.isValid(senderId)) {
+      return{
+        status: 400,
+        success: false,
+        message: "Invalid sender ID",
+      };
+    }
+
+    if (!["accepted", "rejected"].includes(status)) {
+      return{
+        status: 400,  
+        success: false,
+        message: "Status must be either 'accepted' or 'rejected'",
+      };
+    }
+
+    // Find the request in user's requests array
+    const requestIndex = user.requests.findIndex(request => 
+      request.sender_id.equals(senderId) && request.status === "pending"
+    );
+
+    if (requestIndex === -1) {
+      return{
+        status: 404,  
+        success: false,
+        message: "Pending request not found",
+      };
+    }
+
+    // Get sender data
+    const sender = await user_model.findById(senderId);
+    if (!sender) {
+      return{
+        status: 404,    
+        success: false,
+        message: "Sender not found",
+      };
+    }
+
+    if (status === "accepted") {
+      // ACCEPT REQUEST LOGIC
+      // Check if already connected
+      const alreadyConnected = user.connections.some(conn => 
+        conn.equals(senderId)
+      ) || sender.connections.some(conn => 
+        conn.equals(user._id)
+      );
+
+      if (alreadyConnected) {
+        return{
+          status: 400,
+          success: false,
+          message: "Already connected with this user",
+        };
+      }
+
+      // Add to each other's connections
+      user.connections.push(senderId);
+      sender.connections.push(user._id);
+
+      // Remove the request from user's requests array
+      user.requests.splice(requestIndex, 1);
+
+      // Save both users
+      await Promise.all([user.save(), sender.save()]);
+
+      return {
+        success: true,
+        message: "Request accepted and connection established",
+        data: {
+          user,
+          sender,
+        },
+      };
+    } else {
+      // REJECT REQUEST LOGIC
+      
+      // Update request status to rejected
+      user.requests[requestIndex].status = "rejected";
+      await user.save();
+
+      return {
+        status: 200,
+        success: true,
+        message: "Request rejected",
+        data: {
+          user,
+        },
+      };
+    }
+  } catch (error) {
+    console.error("Error updating request:", error);
+    return {
+      status: 500,
+      success: false,
+      message: error.message || "Internal Server Error",
     };
   }
 };
@@ -198,6 +311,70 @@ exports.update_Request = async (req, res) => {
     }
   } catch (error) {
     console.error("Error updating request:", error);
+    return {
+      status: 500,
+      success: false,
+      message: error.message || "Internal Server Error",
+    };
+  }
+};
+exports.allRequest = async (req, res) => {
+  try {
+    const user_id = req.user._id;
+    if (user_id) {
+      const user_data = await user_model.findOne({ _id: user_id });
+
+      // Populate sender's name for each request
+      let allSenderData = [];
+      for (const sender of user_data.requests) {
+        let senderData = await user_model
+          .findOne({ _id: sender.sender_id })
+          .select("-password -auth_key -notificationToken")
+          .exec();
+        allSenderData.push(senderData);
+
+      }
+      return {
+        success: true,
+        message:"All Relatives' Requests fetched",
+        connections: allSenderData,
+      };
+    }
+  } catch (error) {
+    return {
+      success: false,
+      message: error.message,
+    };
+  }
+}
+
+exports.findUserById = async (req, res) => {
+  try {
+    const userId = req.params.id;
+    if (!userId) {
+      return {
+        status: 400,
+        success: false,
+        message: "Invalid user ID",
+      };
+    }
+
+    const user = await user_model.findOne({userId }).select("-password -auth_key -notificationToken");
+    if (!user) {
+      return {
+        status: 404,
+        success: false,
+        message: "User not found",
+      };
+    }
+
+    return {
+      status: 200,
+      success: true,
+       user,
+    };
+  } catch (error) {
+    console.error("Error finding user by ID:", error);
     return {
       status: 500,
       success: false,

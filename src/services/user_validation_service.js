@@ -336,6 +336,7 @@ exports.user_profile = async (req, res) => {
         food_preference: user.food_preference,
         profile_picture: user.profile_picture,
         created_at: user.created_at,
+        avatar: user.avatar,
       },
     };
   } catch (error) {
