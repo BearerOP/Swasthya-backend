@@ -11,6 +11,8 @@ async function user_auth(req, res, next) {
     // console.log(tokenHead);
 
     const token = tokenHead.split(" ")[1];
+    // console.log("Token:", token);
+    
     if (!token) {
       return res.status(401).json({ message: "User is not logged in" });
     }
@@ -20,6 +22,8 @@ async function user_auth(req, res, next) {
       .findOne({ _id: decode.id })
       .select("-password -auth_key -notificationToken")
       .exec();
+      // console.log("User:", user);
+      
     if (!user) return res.status(403).json({ msg: "User not found" });
     req.user = user;
     next();

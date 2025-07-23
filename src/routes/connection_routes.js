@@ -9,8 +9,8 @@ router.use(user_auth);
 router.post("/",  send_request);
 router.get("/",  allConnections);
 router.put("/",update_Request)
-router.get('/:id', findUserById);
 router.get("/allRequest",  allRequest);
+router.get("/findUser", findUserById);
 // router.get("/alluser",  alluser);
 
 module.exports = router;

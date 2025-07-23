@@ -2,6 +2,8 @@ const { send_request ,alluser,allRequest, update_Request, findUserById, allConne
 exports.send_request = async (req, res) => {
   try {
     const data = await send_request(req, res);
+    console.log("Send Request Data:", data);
+    
     if (data.success) {
       res.status(200).json(data);
     } else {
@@ -47,12 +49,12 @@ exports.allConnections = async (req, res) => {
 exports.update_Request = async (req, res) => {
   try {
     const data = await update_Request(req, res);
+    console.log("Update Request Data:", data);
     if (data.success) {
       res.status(200).json(data);
     } else {
+      console.log("Error in update_Request:", data);
       res.status(403).json(data);
-
-    //   console.log("Error:", error);
     }
   } catch (error) {
     console.log("Error:", error);
@@ -73,6 +75,8 @@ exports.allRequest = async (req, res) => {
 };
 
 exports.findUserById = async (req, res) => {
+  // console.log("Finding user by ID:", req.params.id);
+  
  try {
 
   const data  = await findUserById(req, res);

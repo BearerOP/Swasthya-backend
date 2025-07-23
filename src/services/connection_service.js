@@ -1,15 +1,16 @@
 const user_model = require("../models/user_model");
 const mongoose = require("mongoose");
 
-exports.send_request = async (req, res) => {
+exports.send_request = async (req) => {
   try {
     const senderID = req.user._id;
     const receiverId = req.body.receiverId;
+    console.log("Sender ID:", senderID);
+    console.log("Receiver ID:", receiverId);
 
     let receiverData = await user_model.findOne({ userId: receiverId });
     let senderData = await user_model.findOne({ _id: senderID });
 
-    // console.log(receiverData);
     if (!receiverData) {
       return {
         message: "Receiver not found",
@@ -17,8 +18,11 @@ exports.send_request = async (req, res) => {
       };
     }
 
+    // Ensure requests is always an array
+    receiverData.requests = Array.isArray(receiverData.requests) ? receiverData.requests : [];
+
     const existingRequest = receiverData.requests.find((request) =>
-      request.sender_id.equals(senderID)
+      request.sender_id && request.sender_id.equals && request.sender_id.equals(senderID)
     );
 
     if (existingRequest) {
@@ -31,14 +35,14 @@ exports.send_request = async (req, res) => {
     receiverData.requests.push({
       sender_id: senderID,
       status: "pending",
-      
     });
 
+    senderData.requests = Array.isArray(senderData.requests) ? senderData.requests : [];
     senderData.requests.push({
       send_to: receiverData._id,
       status: "pending",
     });
-    const updatedSenderData = await senderData.save();
+    await senderData.save();
     const updatedReceiverData = await receiverData.save();
 
     if (updatedReceiverData) {
@@ -54,7 +58,7 @@ exports.send_request = async (req, res) => {
       };
     }
   } catch (error) {
-    // console.error(error);
+    console.error(error);
     return {
       success: false,
       message: error.message,
@@ -214,6 +218,7 @@ exports.update_Request = async (req, res) => {
 };
 
 exports.update_Request = async (req, res) => {
+  console.log("Update Request Data:", req.body);
   try {
     const user = req.user;
     const { senderId, status } = req.body;
@@ -288,10 +293,8 @@ exports.update_Request = async (req, res) => {
       return {
         success: true,
         message: "Request accepted and connection established",
-        data: {
-          user,
-          sender,
-        },
+        user: user,
+        sender: sender,
       };
     } else {
       // REJECT REQUEST LOGIC
@@ -329,7 +332,7 @@ exports.allRequest = async (req, res) => {
       for (const sender of user_data.requests) {
         let senderData = await user_model
           .findOne({ _id: sender.sender_id })
-          .select("-password -auth_key -notificationToken")
+          .select("-password -auth_key -notificationToken -connections -requests")
           .exec();
         allSenderData.push(senderData);
 
@@ -341,6 +344,8 @@ exports.allRequest = async (req, res) => {
       };
     }
   } catch (error) {
+    console.log("Error fetching all requests:", error);
+    
     return {
       success: false,
       message: error.message,
@@ -350,7 +355,7 @@ exports.allRequest = async (req, res) => {
 
 exports.findUserById = async (req, res) => {
   try {
-    const userId = req.params.id;
+    const userId = req.query.id; // Assuming userId is passed as a query parameter
     if (!userId) {
       return {
         status: 400,
@@ -359,7 +364,7 @@ exports.findUserById = async (req, res) => {
       };
     }
 
-    const user = await user_model.findOne({userId }).select("-password -auth_key -notificationToken");
+    const user = await user_model.findOne({userId }).select("-password -auth_key -notificationToken -connections -requests");
     if (!user) {
       return {
         status: 404,
