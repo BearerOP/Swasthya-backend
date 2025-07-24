@@ -57,7 +57,11 @@ exports.update_Request = async (req, res) => {
       res.status(403).json(data);
     }
   } catch (error) {
-    console.log("Error:", error);
+    res.status(500).json({
+      message: "Internal Server Error",
+      success: false,
+      error: error.message || "An error occurred while processing your request.",
+    });
   }
 };
 

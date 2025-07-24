@@ -179,6 +179,7 @@ exports.update_Request = async (req, res) => {
 
       // Remove the request from user's requests array
       user.requests.splice(requestIndex, 1);
+      sender.requests.splice(sender.requests.findIndex(req => req.send_to.equals(user._id)), 1);
 
       // Save both users
       await Promise.all([user.save(), sender.save()]);
@@ -217,110 +218,112 @@ exports.update_Request = async (req, res) => {
   }
 };
 
-exports.update_Request = async (req, res) => {
-  console.log("Update Request Data:", req.body);
-  try {
-    const user = req.user;
-    const { senderId, status } = req.body;
+// exports.update_Request = async (req, res) => {
+//   console.log("Update Request Data:", req.body);
+//   try {
+//     const user = req.user;
+//     const { senderId, status } = req.body;
 
-    // Validate input
-    if (!senderId || !mongoose.Types.ObjectId.isValid(senderId)) {
-      return{
-        status: 400,
-        success: false,
-        message: "Invalid sender ID",
-      };
-    }
+//     // Validate input
+//     if (!senderId || !mongoose.Types.ObjectId.isValid(senderId)) {
+//       return{
+//         status: 400,
+//         success: false,
+//         message: "Invalid sender ID",
+//       };
+//     }
 
-    if (!["accepted", "rejected"].includes(status)) {
-      return{
-        status: 400,  
-        success: false,
-        message: "Status must be either 'accepted' or 'rejected'",
-      };
-    }
+//     if (!["accepted", "rejected"].includes(status)) {
+//       return{
+//         status: 400,  
+//         success: false,
+//         message: "Status must be either 'accepted' or 'rejected'",
+//       };
+//     }
 
-    // Find the request in user's requests array
-    const requestIndex = user.requests.findIndex(request => 
-      request.sender_id.equals(senderId) && request.status === "pending"
-    );
+//     // Find the request in user's requests array
+//     const requestIndex = user.requests.findIndex(request => 
+//       request.sender_id.equals(senderId) && request.status === "pending"
+//     );
 
-    if (requestIndex === -1) {
-      return{
-        status: 404,  
-        success: false,
-        message: "Pending request not found",
-      };
-    }
+//     if (requestIndex === -1) {
+//       return{
+//         status: 404,  
+//         success: false,
+//         message: "Pending request not found",
+//       };
+//     }
 
-    // Get sender data
-    const sender = await user_model.findById(senderId);
-    if (!sender) {
-      return{
-        status: 404,    
-        success: false,
-        message: "Sender not found",
-      };
-    }
+//     // Get sender data
+//     const sender = await user_model.findById(senderId);
+//     if (!sender) {
+//       return{
+//         status: 404,    
+//         success: false,
+//         message: "Sender not found",
+//       };
+//     }
 
-    if (status === "accepted") {
-      // ACCEPT REQUEST LOGIC
-      // Check if already connected
-      const alreadyConnected = user.connections.some(conn => 
-        conn.equals(senderId)
-      ) || sender.connections.some(conn => 
-        conn.equals(user._id)
-      );
+//     if (status === "accepted") {
+//       // ACCEPT REQUEST LOGIC
+//       // Check if already connected
+//       const alreadyConnected = user.connections.some(conn => 
+//         conn.equals(senderId)
+//       ) || sender.connections.some(conn => 
+//         conn.equals(user._id)
+//       );
 
-      if (alreadyConnected) {
-        return{
-          status: 400,
-          success: false,
-          message: "Already connected with this user",
-        };
-      }
+//       if (alreadyConnected) {
+//         return{
+//           status: 400,
+//           success: false,
+//           message: "Already connected with this user",
+//         };
+//       }
 
-      // Add to each other's connections
-      user.connections.push(senderId);
-      sender.connections.push(user._id);
+//       // Add to each other's connections
+//       user.connections.push(senderId);
+//       sender.connections.push(user._id);
 
-      // Update request status to accepted
-      user.requests[requestIndex].status = "accepted";
+//       // remove the request from user's and sender's requests array
+//       user.requests.splice(requestIndex, 1);
+//       sender.requests.splice(sender.requests.findIndex(req => req.sender_id.equals(user._id)), 1);
 
-      // Save both users
-      await Promise.all([user.save(), sender.save()]);
+//       // Save both users
+//       await Promise.all([user.save(), sender.save()]);
 
-      return {
-        success: true,
-        message: "Request accepted and connection established",
-        user: user,
-        sender: sender,
-      };
-    } else {
-      // REJECT REQUEST LOGIC
+//       return {
+//         status: 200,
+//         success: true,
+//         message: "Request accepted and connection established",
+//         user: user,
+//         sender: sender,
+//       };
+//     } else {
+//       // REJECT REQUEST LOGIC
       
-      // Update request status to rejected
-      user.requests[requestIndex].status = "rejected";
-      await user.save();
+//       // Update request status to rejected
+//       user.requests[requestIndex].status = "rejected";
+//       await user.save();
 
-      return {
-        status: 200,
-        success: true,
-        message: "Request rejected",
-        data: {
-          user,
-        },
-      };
-    }
-  } catch (error) {
-    console.error("Error updating request:", error);
-    return {
-      status: 500,
-      success: false,
-      message: error.message || "Internal Server Error",
-    };
-  }
-};
+//       return {
+//         status: 200,
+//         success: true,
+//         message: "Request rejected",
+//         data: {
+//           user,
+//         },
+//       };
+//     }
+//   } catch (error) {
+//     console.error("Error updating request:", error);
+//     return {
+//       status: 500,
+//       success: false,
+//       message: error.message || "Internal Server Error",
+//     };
+//   }
+// };
 exports.allRequest = async (req, res) => {
   try {
     const user_id = req.user._id;
