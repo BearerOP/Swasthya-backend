@@ -119,12 +119,12 @@ const medicationSchema = new mongoose.Schema({
         {
           dose: {
             type: String,
-            required: true,
+            required: frequencySchema.type === "As Needed" ? false : true,
             trim: true,
           },
           time: {
             type: Date,
-            required: true,
+            required: frequencySchema.type === "As Needed" ? false : true,
             default: Date.now,
           },
         },

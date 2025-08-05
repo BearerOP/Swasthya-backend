@@ -207,7 +207,7 @@ exports.view_all_medication = async (req, res) => {
     }
     return {
       success: true,
-      allMedication,
+      medications:allMedication,
       message: "All Medications fetched succesfully",
     };
   } catch (error) {
