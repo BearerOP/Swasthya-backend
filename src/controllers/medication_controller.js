@@ -9,6 +9,8 @@ const {
 exports.create_medication = async (req, res) => {
   try {
     const data = await create_medication(req, res);
+    console.log("Data:", data);
+    
     if (data.success) {
       res.status(201).json(data);
     } else {
@@ -21,12 +23,15 @@ exports.create_medication = async (req, res) => {
 exports.view_medication = async (req, res) => {
   try {
     const data = await view_medication(req, res);
+    console.log("Data:", data);
     if (data.success) {
       res.status(200).json(data);
     } else {
       res.status(data.status).json(data);
     }
   } catch (error) {
+    console.log(error);
+
     res.status(500).json(error);
   }
 };

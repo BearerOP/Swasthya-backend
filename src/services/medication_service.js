@@ -3,66 +3,56 @@ const medication_model = require("../models/medication_model");
 const reminderModel = require("../models/reminder_model");
 const { scheduleReminder } = require("../../public/utils/scheduler");
 const User = require("../models/user_model");
+
+
+
 exports.create_medication = async (req) => {
   const user_id = req.user._id;
-  console.log("user_id in create medication:", user_id);
-  let relativeUser = null; // Initialize relativeUser to null
-
   const {
-    medicine_name,
-    forms,
-    strength,
-    unit,
-    frequency,
-    times,
-    start_date,
-    description,
-    forWhom , // Default to 'myself' if not provided
-    relative_id // This will be set conditionally if forWhom is 'relative'
+    medicine_name, forms, strength, unit, frequency,
+    times, start_date, description, forWhom, relative_id
   } = req.body;
-  console.log("Request body in create medication:", req.body);
+  console.log("User ID in create_medication:", forWhom, relative_id);
   
-  
+
   if (!user_id) {
-    return {
-      status: 404,
-      success: false,
-      message: "User not found",
-    };
+    return { status: 404, success: false, message: "User not found" };
   }
-  console.log("User ID in create medication:", user_id);
-  
-
-  console.log("Required fields validated in create medication");
-  console.log("Frequency:", frequency);
-  console.log("Times:", times);
-  console.log("Start Date:", start_date);
-  console.log("Description:", description);
-  // Validate required fields
   if (!medicine_name || !forms || !strength || !unit || !frequency || !times || !start_date) {
-    return {
-      status: 400,
-      success: false,
-      message: "Missing required medication fields",
-    };
+    return { status: 400, success: false, message: "Missing required medication fields" };
+  }
+  if (!['myself', 'relative'].includes(forWhom)) {
+    return { status: 400, success: false, message: "forWhom must be either 'myself' or 'relative'" };
   }
 
-  // Validate forWhom
-  if (!['myself', 'relative'].includes(forWhom)) {
-    return {
-      status: 400,
-      success: false,
-      message: "forWhom must be either 'myself' or 'relative'",
-    };
-  }
-  console.log("forWhom validated in create medication:", forWhom);
-  // Start a MongoDB session for transaction
   const session = await mongoose.startSession();
   session.startTransaction();
-  relativeUser= await User.findOne({userId: relative_id}).session(session);
 
   try {
-    let result;
+    let targetUserId = user_id; // default to self
+    let medForWhom = forWhom;
+    let medRelativeId = null;
+    console.log("Target User ID:", targetUserId);
+    console.log("For Whom:", medForWhom);
+    console.log("Relative ID:", medRelativeId);
+
+    if (forWhom === "relative") {
+      if (!relative_id) {
+        await session.abortTransaction();
+        session.endSession();
+        return { status: 400, success: false, message: "Relative ID is required for relative medication" };
+      }
+      const relativeUser = await User.findOne({ userId: relative_id }).session(session);
+      if (!relativeUser) {
+        await session.abortTransaction();
+        session.endSession();
+        return { status: 404, success: false, message: "Relative user not found" };
+      }
+      targetUserId = relativeUser._id;
+      medRelativeId = user_id; // who is adding for the relative
+    }
+
+    // ADD "created_by"
     const medicationData = {
       medicine_name,
       forms,
@@ -72,109 +62,37 @@ exports.create_medication = async (req) => {
       times,
       start_date,
       description,
-      // forWhom,
-      // relative_id: null
     };
-    // Handle medication for myself
-    
-    // Handle medication for relative
-    if (medicationData.forWhom === "relative") {
-      if (!relative_id) {
-        await session.abortTransaction();
-        session.endSession();
-        return {
-          status: 400,
-          success: false,
-          message: "Relative ID is required for relative medication",
-        };
-      }
-      medicationData.relative_id = relative_id;
-    
-      // Add medication to relative's record
-      const relativeUpdate = await medication_model.findOneAndUpdate(
-        { user_id: relativeUser._id },
-        { 
-          $push: {
-            record: {
-              ...medicationData,
-              relative_id: req.user._id, // Set the relative_id to the current user's ID
-              forWhom: 'relative',
-            }
-          }
-        },
-        { upsert: true, new: true, session }
-      );
-   
-      if (!relativeUpdate) {
-        await session.abortTransaction();
-        session.endSession();
-        return {
-          status: 500,
-          success: false,
-          message: "Failed to update relative's medication record",
-        };
-      }
-    }
- 
 
-    // Always add to the current user's record
-    const existingUser = await medication_model.findOne({ user_id }).session(session);
+    // Add medication (append, don't overwrite)
+    let result = await medication_model.findOneAndUpdate(
+      { user_id: targetUserId },
+      { $push: { record: medicationData },created_by: user_id ,relative_id: medRelativeId,forWhom: medForWhom },
+      { upsert: true, new: true, session }
 
-    if (!existingUser) {
-      // Create new medication record for user
-      result = await medication_model.create([{
-        user_id,
-        record: [medicationData],
-        forWhom: forWhom,
-        relative_id: relativeUser._id || null, // Set relative_id if provided
-      }], { session });
-      result = result[0];
-    } else {
-
-      // Update existing medication record
-      result = await medication_model.findOneAndUpdate(
-        { user_id },
-        { $push: { record: medicationData },
-          // Note: relative_id is not needed here since it's already set in the medicationData
-          forWhom: forWhom,
-          relative_id: relativeUser._id || null // Ensure relative_id is set correctly
-        },
-        // Use upsert to create the record if it doesn't exist
-        { new: true, session }
-        
-      );
-    }
-
-
+    );
+    console.log("Medication Result:", result);
     if (!result) {
       await session.abortTransaction();
       session.endSession();
-      return {
-        status: 500,
-        success: false,
-        message: "Failed to create or update medication record",
-      };
+      return { status: 500, success: false, message: "Failed to create or update medication record" };
     }
-  
-    // Schedule reminders
-    await scheduleMedicationReminders([medicationData], user_id);
 
+    await scheduleMedicationReminders([medicationData], targetUserId);
 
-    // Commit the transaction
     await session.commitTransaction();
     session.endSession();
     return {
       status: 200,
       success: true,
       message: "Medication added successfully",
-      data: result,
+      data: result
     };
   } catch (error) {
-    // Abort transaction on error
+    console.log("Error in create_medication:", error);
+    
     await session.abortTransaction();
     session.endSession();
-    
-    console.error("Error in create_medication:", error);
     return {
       status: 500,
       success: false,
@@ -183,6 +101,8 @@ exports.create_medication = async (req) => {
     };
   }
 };
+
+
 
 const scheduleMedicationReminders = async (medicationRecords, user_id) => {
   try {
@@ -242,6 +162,8 @@ const scheduleMedicationReminders = async (medicationRecords, user_id) => {
 exports.view_medication = async (req, res) => {
   try {
     const user_id = req.user._id;
+    console.log("User ID in view_medication:", user_id);
+    
     const medication_id = new mongoose.Types.ObjectId(req.query.medication_id);
     let allMedication = await medication_model.findOne({ user_id: user_id });
 
@@ -253,18 +175,23 @@ exports.view_medication = async (req, res) => {
     })
     if(!queryMedication){
       return{
+        status: 404,
         success:false,
         message:"Medication not found"
       }
     }
     return{
+      status: 200,
       success:true,
       message:"Fetched Medication successfully",
       medication:queryMedication
     }
 
   } catch (error) {
+    console.log(error);
+    
     return {
+      status: 500,
       success: false,
       message: error.message,
     };

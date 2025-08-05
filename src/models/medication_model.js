@@ -1,23 +1,33 @@
 const mongoose = require("mongoose");
 
-// Define frequency schema
+/**
+ * Frequency schema to define how often medication should be taken.
+ */
 const frequencySchema = new mongoose.Schema({
   type: {
     type: String,
     required: true,
-    enum: ["At Regular Intervals", "On Specific Days Of Week", "As Needed","Daily", "Weekly", "Monthly"],
+    enum: [
+      "At Regular Intervals",
+      "On Specific Days Of Week",
+      "As Needed",
+      "Daily",
+      "Weekly",
+      "Monthly"
+    ],
   },
   interval: {
     type: Number,
-    default: 1, // Default interval, you can change it as needed
+    default: 1, // Interval count, e.g., every 1 day, 1 week, etc.
   },
   specificDays: {
-    type: [String], // Array of specific days (e.g., ["Monday", "Wednesday"])
+    type: [String], // Specific days of week when medication is scheduled, e.g., ["Monday", "Wednesday"]
   },
-});
+}, { _id: false });
 
-// Define log schema
-// Define log schema without medicine_name
+/**
+ * Log schema to track medication intake events.
+ */
 const logSchema = new mongoose.Schema({
   time: {
     type: Date,
@@ -32,35 +42,41 @@ const logSchema = new mongoose.Schema({
     type: Boolean,
     default: false,
   },
-});
+}, { _id: false });
 
-// Define medication schema
+/**
+ * Medication schema
+ * Represents medications assigned to users or their relatives.
+ */
 const medicationSchema = new mongoose.Schema({
   user_id: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "User",
     required: true,
   },
-   // medication for myself or for someone else
   forWhom: {
     type: String,
     required: true,
     enum: ["myself", "relative"],
   },
-  // If for relative, then relative_id is required
   relative_id: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "User",
     required: function () {
-      return this.forWhom === "relative"; // Only required if forWhom is 'relative'
+      return this.forWhom === "relative";
     },
   },
-  // Record of medications
+  created_by: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "User",
+    required: true,
+  },
   record: [
     {
       medicine_name: {
         type: String,
         required: true,
+        trim: true,
       },
       forms: {
         type: String,
@@ -88,11 +104,12 @@ const medicationSchema = new mongoose.Schema({
       strength: {
         type: String,
         required: true,
+        trim: true,
       },
       unit: {
         type: String,
-        required: true,
         enum: ["mg", "mcg", "g", "ml", "%"],
+        required: true,
       },
       frequency: {
         type: frequencySchema,
@@ -100,17 +117,15 @@ const medicationSchema = new mongoose.Schema({
       },
       times: [
         {
-          // No. of medicine eg. : 2 tablets
           dose: {
             type: String,
             required: true,
+            trim: true,
           },
-          // Time of medicine
           time: {
             type: Date,
             required: true,
             default: Date.now,
-          
           },
         },
       ],
@@ -122,15 +137,19 @@ const medicationSchema = new mongoose.Schema({
       description: {
         type: String,
         required: true,
+        trim: true,
       },
-      logs: [logSchema], // Reference to log schema
+      logs: [logSchema],
       timestamp: {
         type: Date,
         default: Date.now,
       },
     },
   ],
+}, {
+  timestamps: true, // Adds createdAt and updatedAt fields to medication documents
 });
 
 const Medication = mongoose.model("Medication", medicationSchema);
+
 module.exports = Medication;
