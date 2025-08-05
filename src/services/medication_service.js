@@ -20,6 +20,8 @@ exports.create_medication = async (req) => {
     forWhom , // Default to 'myself' if not provided
     relative_id // This will be set conditionally if forWhom is 'relative'
   } = req.body;
+  console.log("Request body in create medication:", req.body);
+  
   
   if (!user_id) {
     return {
@@ -28,8 +30,14 @@ exports.create_medication = async (req) => {
       message: "User not found",
     };
   }
+  console.log("User ID in create medication:", user_id);
   
 
+  console.log("Required fields validated in create medication");
+  console.log("Frequency:", frequency);
+  console.log("Times:", times);
+  console.log("Start Date:", start_date);
+  console.log("Description:", description);
   // Validate required fields
   if (!medicine_name || !forms || !strength || !unit || !frequency || !times || !start_date) {
     return {
@@ -39,8 +47,6 @@ exports.create_medication = async (req) => {
     };
   }
 
- 
-  
   // Validate forWhom
   if (!['myself', 'relative'].includes(forWhom)) {
     return {
@@ -49,7 +55,7 @@ exports.create_medication = async (req) => {
       message: "forWhom must be either 'myself' or 'relative'",
     };
   }
-
+  console.log("forWhom validated in create medication:", forWhom);
   // Start a MongoDB session for transaction
   const session = await mongoose.startSession();
   session.startTransaction();
@@ -69,7 +75,7 @@ exports.create_medication = async (req) => {
       // forWhom,
       // relative_id: null
     };
-
+    // Handle medication for myself
     
     // Handle medication for relative
     if (medicationData.forWhom === "relative") {

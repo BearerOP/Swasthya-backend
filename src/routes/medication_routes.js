@@ -1,5 +1,5 @@
 const express = require("express");
-const reminder_router = express.Router();
+const router = express.Router();
 
 const user_auth = require("../../middleware/user_auth.js");
 
@@ -12,14 +12,15 @@ const {
     
 } = require("../controllers/medication_controller.js");
 
-reminder_router.use(user_auth);
+router.use(user_auth);
 
-reminder_router.post("/", create_medication);
-reminder_router.delete("/", delete_medication);
-reminder_router.get("/", view_medication);
-reminder_router.get("/all", view_all_medication);
+router.post("/", create_medication); // Create a new medication
+router.delete("/", delete_medication); // Delete a medication
+// router.put("/", update_medication); // Update a medication
+router.get("/", view_medication);
+router.get("/all", view_all_medication);
 
 // reminder_router.post("/medication/update", user_auth, update_medication);
 
 
-module.exports = reminder_router;
+module.exports = router;

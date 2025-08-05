@@ -5,7 +5,7 @@ const frequencySchema = new mongoose.Schema({
   type: {
     type: String,
     required: true,
-    enum: ["At Regular Intervals", "On Specific Days Of Week", "As Needed"],
+    enum: ["At Regular Intervals", "On Specific Days Of Week", "As Needed","Daily", "Weekly", "Monthly"],
   },
   interval: {
     type: Number,
