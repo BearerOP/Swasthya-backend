@@ -57,7 +57,7 @@ const medicationSchema = new mongoose.Schema({
   forWhom: {
     type: String,
     required: true,
-    enum: ["myself", "relative"],
+    enum: ["myself", "connection"],
   },
   relative_id: {
     type: mongoose.Schema.Types.ObjectId,
@@ -73,6 +73,11 @@ const medicationSchema = new mongoose.Schema({
   },
   record: [
     {
+      medication_image: {
+        type: String,
+        required: false,
+        default: null,
+      },
       medicine_name: {
         type: String,
         required: true,
@@ -122,7 +127,7 @@ const medicationSchema = new mongoose.Schema({
             required: frequencySchema.type === "As Needed" ? false : true,
             trim: true,
           },
-          time: {
+          reception_time: {
             type: Date,
             required: frequencySchema.type === "As Needed" ? false : true,
             default: Date.now,
@@ -138,6 +143,10 @@ const medicationSchema = new mongoose.Schema({
         type: String,
         required: true,
         trim: true,
+      },
+      fills:{
+        type: Number,
+        default: 0,
       },
       logs: [logSchema],
       timestamp: {

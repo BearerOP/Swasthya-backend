@@ -134,6 +134,9 @@ exports.update_Request = async (req, res) => {
     }
 
     // Find the request in user's requests array
+    console.log("User Requests:", user.requests);
+    console.log("Sender ID:", senderId);
+
     const requestIndex = user.requests.findIndex(request => 
       request.sender_id.equals(senderId) && request.status === "pending"
     );
@@ -159,6 +162,9 @@ exports.update_Request = async (req, res) => {
     if (status === "accepted") {
       // ACCEPT REQUEST LOGIC
       // Check if already connected
+      console.log("User Connections:", user.connections);
+      console.log("Sender Connections:", sender.connections);
+
       const alreadyConnected = user.connections.some(conn => 
         conn.equals(senderId)
       ) || sender.connections.some(conn => 

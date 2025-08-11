@@ -21,8 +21,8 @@ exports.create_medication = async (req) => {
   if (!medicine_name || !forms || !strength || !unit || !frequency || !times || !start_date) {
     return { status: 400, success: false, message: "Missing required medication fields" };
   }
-  if (!['myself', 'relative'].includes(forWhom)) {
-    return { status: 400, success: false, message: "forWhom must be either 'myself' or 'relative'" };
+  if (!['myself', 'connection'].includes(forWhom)) {
+    return { status: 400, success: false, message: "forWhom must be either 'myself' or 'connection'" };
   }
 
   const session = await mongoose.startSession();
@@ -36,7 +36,7 @@ exports.create_medication = async (req) => {
     console.log("For Whom:", medForWhom);
     console.log("Relative ID:", medRelativeId);
 
-    if (forWhom === "relative") {
+    if (forWhom === "connection") {
       if (!relative_id) {
         await session.abortTransaction();
         session.endSession();
