@@ -30,7 +30,7 @@ app.use(express.static(path.join(__dirname, "/public")));
 app.use("/public", express.static("public"));
 
 app.use("/status",(req,res)=>{
-res.send("Welcome to the Slug Server")
+res.send("Swasthya Server is up and running.....");
 });
 
 app.use("/user", user);

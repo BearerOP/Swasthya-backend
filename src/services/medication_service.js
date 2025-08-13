@@ -12,6 +12,7 @@ exports.create_medication = async (req) => {
     medicine_name, forms, strength, unit, frequency,
     times, start_date, description, forWhom, relative_id
   } = req.body;
+<<<<<<< HEAD
   console.log("User ID in create_medication:", forWhom, relative_id);
   
 
@@ -23,6 +24,17 @@ exports.create_medication = async (req) => {
   }
   if (!['myself', 'connection'].includes(forWhom)) {
     return { status: 400, success: false, message: "forWhom must be either 'myself' or 'connection'" };
+=======
+  console.log(req.body);
+  
+
+  if (!user_id) {
+    return {
+      status: 404,
+      success: false,
+      message: "User not found",
+    };
+>>>>>>> 35ade63db8b0b9408db9e3a1479990ac7ec80e02
   }
 
   const session = await mongoose.startSession();
@@ -42,11 +54,40 @@ exports.create_medication = async (req) => {
         session.endSession();
         return { status: 400, success: false, message: "Relative ID is required for relative medication" };
       }
+<<<<<<< HEAD
       const relativeUser = await User.findOne({ userId: relative_id }).session(session);
       if (!relativeUser) {
         await session.abortTransaction();
         session.endSession();
         return { status: 404, success: false, message: "Relative user not found" };
+=======
+    } else {
+      updatedUser = await medication_model.findOneAndUpdate(
+        { user_id },
+        {
+          $push: {
+            record: {
+              medicine_name,
+              forms,
+              strength,
+              unit,
+              frequency,
+              times,
+              start_date,
+              description,
+            },
+          },
+        },
+        { new: true }
+      );
+
+      if (!updatedUser) {
+        return {
+          status: 400,
+          success: false,
+          message: "Medication not added",
+        };
+>>>>>>> 35ade63db8b0b9408db9e3a1479990ac7ec80e02
       }
       targetUserId = relativeUser._id;
       medRelativeId = user_id; // who is adding for the relative
@@ -94,7 +135,11 @@ exports.create_medication = async (req) => {
     await session.abortTransaction();
     session.endSession();
     return {
+<<<<<<< HEAD
       status: 500,
+=======
+      status: 400,
+>>>>>>> 35ade63db8b0b9408db9e3a1479990ac7ec80e02
       success: false,
       message: "An error occurred while adding medication",
       error: error.message,
