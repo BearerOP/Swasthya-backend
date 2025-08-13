@@ -4,8 +4,9 @@ const jwt = require("jsonwebtoken");
 const TeleSignSDK = require("telesignsdk");
 
 const { getdata } = require("../Utils/redis");
-const sendOtp = require("../Utils/sendOtp");
+const {sendOtp, verifyOtp} = require("../Utils/sendOtp");
 const { getOtp } = require("../Utils/mapstore");
+const { generateUserId } = require("../Utils/generate");
 
 exports.user_login = async (req, res) => {
   try {
@@ -61,6 +62,12 @@ exports.user_login = async (req, res) => {
       message: "User logged in successfully",
       success: true,
       token,
+      user: {
+        id: existingUser._id,
+        username: existingUser.username,
+        mobile: existingUser.mobile,
+        email: existingUser.email,
+      },
     };
   } catch (error) {
     return {
@@ -75,6 +82,7 @@ exports.user_register = async (req, res) => {
   const {
     username,
     mobile,
+    email,
     password,
     weight,
     height,
@@ -92,6 +100,41 @@ exports.user_register = async (req, res) => {
         success: false,
       };
     }
+    if (mobile.length < 10 || mobile.length > 15) {
+      return {
+        status: 400,
+        message: "Mobile number must be between 10 and 15 digits",
+        success: false,
+      };
+    }
+    if (password.length < 6 || password.length > 20) {
+      return {
+        status: 400,
+        message: "Password must be between 6 and 20 characters long",
+        success: false,
+      };
+    }
+    if (!weight || weight <= 0) {
+      return {
+        status: 400,
+        message: "Weight must be a positive number",
+        success: false,
+      };
+    }
+    if (!height || height <= 0) {
+      return {
+        status: 400,
+        message: "Height must be a positive number",
+        success: false,
+      };
+    }
+    if (!dob || isNaN(new Date(dob).getTime())) {
+      return {
+        status: 400,
+        message: "Invalid date of birth",
+        success: false,
+      };
+    }
     const existingUser = await user_model.findOne({ mobile });
     if (existingUser) {
       return {
@@ -104,8 +147,10 @@ exports.user_register = async (req, res) => {
     const hashedPassword = await bcrypt.hash(password, 10);
 
     const newUser = await user_model.create({
+      userId: generateUserId(),
       username,
       mobile,
+      email: email || 'user@example.com',
       password: hashedPassword,
       weight,
       height,
@@ -165,7 +210,7 @@ exports.user_logout = async (req, res) => {
   }
 };
 exports.sendOtp = async (req, res) => {
-  const mobile = req.body.mobile;
+  const {countryCode,mobile} = req.body;
   try {
     const existingUser = await user_model.findOne({ mobile });
     if (existingUser) {
@@ -175,8 +220,13 @@ exports.sendOtp = async (req, res) => {
         message: "User already exists",
       };
     }
-    
-    
+    if (!mobile || mobile.length < 10 || mobile.length > 15) {
+      return {
+        status: 400,
+        success: false,
+        message: "Mobile number must be between 10 and 15 digits",
+      };
+    }
     const result = await sendOtp(mobile);
 
     if (!result.success) {
@@ -201,7 +251,6 @@ exports.sendOtp = async (req, res) => {
       };
     }
   } catch (error) {
-    console.error("Error: ", error);
     return {
       status: 500,
       success: false,
@@ -212,23 +261,21 @@ exports.sendOtp = async (req, res) => {
 
 exports.verifyOtp = async (req, res) => {
   const { mobile, otp } = req.body;
-  const verifyOtp = await getOtp(mobile);
-  if (!verifyOtp) {
+  if (!mobile || !otp) {
     return {
       status: 400,
       success: false,
-      message: "OTP expired",
+      message: "Mobile number and OTP are required",
     };
   }
-
+  if (otp.length !== 6) {
+    return {
+      status: 400,
+      success: false,
+      message: "Invalid OTP format",
+    };
+  }
   try {
-    if (!mobile || !otp) {
-      return {
-        status: 400,
-        success: false,
-        message: "Mobile number or OTP is missing",
-      };
-    }
     const existingUser = await user_model.findOne({ mobile });
     if (existingUser) {
       return {
@@ -237,12 +284,13 @@ exports.verifyOtp = async (req, res) => {
         message: "User already exists",
       };
     }
-
-    if (verifyOtp !== otp) {
+    const result =  await verifyOtp(mobile, otp);
+    
+    if (!result.success) {
       return {
-        status: 400,
+        status: 500,
         success: false,
-        message: "Invalid OTP",
+        message: "OTP verification failed",
       };
     }
     return {
@@ -250,7 +298,6 @@ exports.verifyOtp = async (req, res) => {
       success: true,
       message: "OTP verified successfully",
     };
-
 
   } catch (error) {
     return {
@@ -277,7 +324,20 @@ exports.user_profile = async (req, res) => {
     return {
       status: 200,
       success: true,
-      user,
+      user:{
+        userId: user.userId,
+        username: user.username,
+        mobile: user.mobile,
+        email: user.email,
+        weight: user.weight,
+        height: user.height,
+        dob: user.dob,
+        gender: user.gender,
+        food_preference: user.food_preference,
+        profile_picture: user.profile_picture,
+        created_at: user.created_at,
+        avatar: user.avatar,
+      },
     };
   } catch (error) {
     return {
